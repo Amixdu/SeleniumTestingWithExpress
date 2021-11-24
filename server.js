@@ -33,15 +33,11 @@ const userRouter = require('./routes/results')
 app.post("/", (req, res) => {
     var isValid = true
     if (isValid) {
-        console.log(req.body.filePath)
+        // console.log(req.body.filePath)
         tester(req.body.filePath, function() {
-            console.log(globalArray[0])
             res.send(globalString)
             globalString = ""
         })
-        // result = tester(req.body.filePath)
-        // console.log(result[0])
-        // res.redirect('/results')
        
     }
     else{
@@ -742,7 +738,6 @@ async function tester(fp, callback){
         await testName();
         await testTheme();
         await testSkills();
-        console.log(globalString)
         driver.quit();
 
         if (errorLog.length == 0){
