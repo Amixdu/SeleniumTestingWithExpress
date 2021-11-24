@@ -4,26 +4,6 @@ var PORT = 3000;
 
 app.set('view engine', 'ejs')
 
-// app.get('/', function(req, res){
-//     res.sendFile("index", options, function (err) {
-//         if (err) {
-//             next(err);
-//         } else {
-//             console.log('Sent:', fileName);
-//         }
-//     });
-// });
- 
-// app.post('/', function(req, res){
-//   displayResults();
-// })
-
-
-// app.get('/', (req, res) => {
-//     console.log('Here')
-//     res.render('index')
-// })
-
 app.use(express.static("public"))
 app.use(express.urlencoded({ extended: true} ))
 
@@ -32,27 +12,26 @@ const userRouter = require('./routes/results')
 
 app.post("/", (req, res) => {
     // cleaning variables each time POST request is recieved
-    globalString = ""
-    htmlBuf = ""
-    cssBuf = ""
-    jsBuf = ""
+    // globalString = ""
+    globalString = "<div  style='text-align:center'>";
+    htmlBuf = "<p style='font-size:20px'>HTML: <br></p>"
+    cssBuf = "<p style='font-size:20px'>CSS: <br></p>"
+    jsBuf = "<p style='font-size:20px'>JavaScript: <br></p>"
 
     var isValid = true
     if (isValid) {
-        // console.log(req.body.filePath)
         tester(req.body.filePath, function() {
             res.send(globalString)
-        }).catch(
-            res.send("Invalid file path, please re-enter the location of the file")
-        )
-       
+        })
+        // .catch(
+        //     console.log("CAUGHT ================================================")
+        // )
     }
     else{
         console.log("Error")
         res.redirect('/')
     }
     
-    // res.send("Obtained path")
 })
 
 
@@ -65,15 +44,19 @@ app.listen(PORT, function(err){
 });
 
 
+
 var globalArray = [];
 var count = 0;
-var globalString = "<div>";
-var htmlBuf = "HTML: <br>"
-var cssBuf = "CSS: <br>"
-var jsBuf = "JavaScript: <br>"
+var globalString = "<div style='background:blue;'>";
+
+// globalString += "<p style='font-size:25px'>Name: <br></p>"
+var htmlBuf = "<p style='font-size:20px'>HTML: <br></p>"
+var cssBuf = "<p style='font-size:20px'>CSS: <br></p>"
+var jsBuf = "<p style='font-size:20px'>JavaScript: <br></p>"
 
 // CODE BELOW IS THE SELEINUM AUTOMATED TESTER
 async function tester(fp, callback){
+    
 
     // ENTER FILE LOCATION OF THE FILE TO BE TESTED BELOW:
     const FILE_PATH = fp
@@ -90,22 +73,20 @@ async function tester(fp, callback){
     const chromeOptions = new ChromeOptions();
     chromeOptions.excludeSwitches('enable-logging');
   
-    // open html
     let driver = new webdriver.Builder()
         .forBrowser("chrome")
         .setChromeOptions(chromeOptions)
         .build();
-  
-    try{
-        driver.get(FILE_PATH);
-    }
-    catch{
-        globalString = "Invalid file path, please re-enter the location of the file"
-        callback()
-    }
+
+
     
-  
-    // document.getElementById('namePromptEmpty').innerHTML = "Works2";
+    
+    
+    
+
+     
+    
+    
   
     /**
     * The function computes the age of the person based on the date of birth entered and the current date
@@ -150,7 +131,8 @@ async function tester(fp, callback){
         // obtain the value displayed on the right side
         let prompt = await driver.findElement(By.id("nameOutput")).getText();
     
-        globalString += "Name: <br>"
+        // globalString += "Name: <br>"
+        globalString += "<p style='font-size:25px'>Name:</p>"
         // check if text has been changed due to click
         if (prompt != initial){  
             points = points + 1;
@@ -232,7 +214,7 @@ async function tester(fp, callback){
         let prompt = await driver.findElement(By.id("ageOutput")).getText();
   
   
-        globalString += "Age: <br>"
+        globalString += "<p style='font-size:25px'>Age:</p>"
         // check if text has been changed due to click
         if (prompt != initial){
               points = points + 1;
@@ -307,11 +289,11 @@ async function tester(fp, callback){
               points = points + 1;
               globalArray[count] = true;
               count += 1;
-              globalString += "Displaying greeting with age when user clicks away when input box is non-empty &#9989;<br>"
+              globalString += "Displaying greeting with correct age when user clicks away when input box is non-empty &#9989;<br>"
         }
         else {
               errorLog.push("Age is not displayed correctly");
-              globalString += "Displaying greeting with age when user clicks away when input box is non-empty &#10060;<br>"
+              globalString += "Displaying greeting with correct age when user clicks away when input box is non-empty &#10060;<br>"
         }
 
         globalString += "<br>"
@@ -408,11 +390,11 @@ async function tester(fp, callback){
     */
     async function testTheme(){
         // console.log(globalString)
-        globalString += "Theme: <br><br>"
-        globalString += "Dark Mode: <br>"
+        globalString += "<p style='font-size:25px'>Theme: <br></p>"
+        globalString += "<p style='font-size:20px'>Dark Mode:</p>"
         await testMode("dark");
         globalString += "<br>"
-        globalString += "Light Mode: <br>"
+        globalString += "<p style='font-size:20px'>Light Mode:</p>"
         await testMode("light");
         globalString += "<br>"
         // console.log(globalString)
@@ -653,7 +635,7 @@ async function tester(fp, callback){
         let left = "left";
         let right = "right;"
 
-        globalString += "Skills: <br><br>"
+        globalString += "<p style='font-size:25px'>Skills: <br></p>"
   
         // testing hover
         let htmlButton = await driver.findElement(By.id("html"));
@@ -794,51 +776,77 @@ async function tester(fp, callback){
             await driver.findElement(By.id("skillsOutput"));
             return true;
         }
-        catch{
+        
+        catch (e){
+            globalString = "There is a problem in the provided file. Please ensure that the entered file path is correct and the original element IDs of the starter HTML code is not modified"
             return false;
         }
+        
     }
   
   
     /**
         * This is the main function that invokes the validation function and the testing functions
     */
-    
-    if (await validateFile() == true){
-        await testBirthday();
-        await testName();
-        await testTheme();
-        await testSkills();
-        globalString += "<br><br>Final Points: " + points.toString();
-        globalString += "<div>"
-        driver.quit();
+    // try{
+    //     await initializeDriver()
+    // }
+    // catch{
+    //     driver.quit()
+    //     globalString = "File path error"
+    //     callback()
+    // }
 
-        if (errorLog.length == 0){
-            console.log("Final Score: " + points + "/24 (Full Points)");
+    let pathErr = false
+    let first = fp.split(':')[0]
+
+
+    if (first.length == fp.length){
+        pathErr = true
+    }
+    let sliced = fp.slice(first.length)
+    if (sliced[0] != ':'){
+        pathErr = true
+    }
+
+    if (pathErr == false){
+        // open html
+        driver.get(FILE_PATH);
+
+        if (await validateFile() == true){
+            await testName();
+            await testBirthday();
+            await testTheme();
+            await testSkills();
+            globalString += "<p style='font-size:20px'> <br><br>Final Points: " + points.toString() + "/24 </p>";
+            globalString += "</div>"
+
+            if (errorLog.length == 0){
+                console.log("Final Score: " + points + "/24 (Full Points)");
+            }
+            else{
+                console.log("\nFinal Score: " + points + "/24");
+                console.log("\nError Log: ");
+                for (let i = 0; i < errorLog.length; i++){
+                    console.log(errorLog[i]);
+                }
+                console.log("\n");
+            }
+            
         }
         else{
-            console.log("\nFinal Score: " + points + "/24");
-            console.log("\nError Log: ");
-            for (let i = 0; i < errorLog.length; i++){
-                console.log(errorLog[i]);
-            }
-            console.log("\n");
+            console.log("\nAn Id of an element in the original starter HTML code file has been removed or changed\n");
         }
-        
     }
     else{
-        driver.quit();
-        globalString = "An Id of an element in the original starter HTML code file has been removed or changed. Please check the html file"
-        console.log("\nAn Id of an element in the original starter HTML code file has been removed or changed\n");
+        globalString = "Provided file path is invalid"
     }
+
     
-  
+    
+    driver.quit();
     callback();
   }
   
   
-  
-  
-  
-  
-  
+ 
