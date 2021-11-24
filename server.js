@@ -31,13 +31,20 @@ const userRouter = require('./routes/results')
 
 
 app.post("/", (req, res) => {
+    // cleaning variables each time POST request is recieved
+    globalString = ""
+    htmlBuf = ""
+    cssBuf = ""
+    jsBuf = ""
+
     var isValid = true
     if (isValid) {
         // console.log(req.body.filePath)
         tester(req.body.filePath, function() {
             res.send(globalString)
-            globalString = ""
-        })
+        }).catch(
+            res.send("Invalid file path, please re-enter the location of the file")
+        )
        
     }
     else{
@@ -47,14 +54,6 @@ app.post("/", (req, res) => {
     
     // res.send("Obtained path")
 })
-
-async function print(list, callback){
-    for (let i = 0; i < list.length; i ++){
-        console.log(result[i])
-    }
-    callback();
-    
-}
 
 
 app.use('/results', userRouter )
@@ -66,29 +65,18 @@ app.listen(PORT, function(err){
 });
 
 
-
-
-
-
-
-
 var globalArray = [];
-var globalString = "";
 var count = 0;
+var globalString = "<div>";
+var htmlBuf = "HTML: <br>"
+var cssBuf = "CSS: <br>"
+var jsBuf = "JavaScript: <br>"
 
 // CODE BELOW IS THE SELEINUM AUTOMATED TESTER
 async function tester(fp, callback){
 
-    // testing
-    
-
-    // document.getElementById('namePromptEmpty').innerHTML = "Works";
-  
-  
-  
     // ENTER FILE LOCATION OF THE FILE TO BE TESTED BELOW:
     const FILE_PATH = fp
-    const FILE_PATH2 = "file:///C:/Users/Methma Wijerathna/Desktop/Methma Wijerathna/Projects/Web Projects/SeleniumAutomation/index.html";
   
     const {Builder, Key, By, until} = require("selenium-webdriver");
   
@@ -108,7 +96,14 @@ async function tester(fp, callback){
         .setChromeOptions(chromeOptions)
         .build();
   
-    driver.get(FILE_PATH);
+    try{
+        driver.get(FILE_PATH);
+    }
+    catch{
+        globalString = "Invalid file path, please re-enter the location of the file"
+        callback()
+    }
+    
   
     // document.getElementById('namePromptEmpty').innerHTML = "Works2";
   
@@ -461,7 +456,17 @@ async function tester(fp, callback){
         }
         else{
             errorLog.push("The colour of " + await button.getText() + " button is not changed on mouse hover when the button is on the " + side);
-            globalString += (await button.getText().toUpperCase() + " button changing button colour on mouse hover &#10060;<br>")
+            // globalString += (await button.getText().toUpperCase() + " button changing button colour on mouse hover &#10060;<br>")
+            let key = (await button.getText()).toLowerCase();
+            if (key == "html"){
+                htmlBuf += "Button changing colour on mouse hover from the " + side + " side &#10060;<br>"
+            }
+            else if (key == "css"){
+                cssBuf += "Button changing colour on mouse hover from the " + side + " side &#10060;<br>"
+            }
+            else if (key == "javascript"){
+                jsBuf += "Button changing colour on mouse hover from the " + side + " side &#10060;<br>"
+            }
         }
     }
   
@@ -514,17 +519,7 @@ async function tester(fp, callback){
                 foundRight = true;
             }
         }
-  
-        // if button not moved to right side, consequently points will be reduced for hovering on right side and moving back to left
-        if (foundRight == false){
-            errorLog.push(id + " button not moved to right side");
-            globalString += (await button.getText() + " button moving to right side on click &#10060;<br>")
-            errorLog.push("The colour of " + id + " button is not changed on mouse hover when the button is on the right");
-            globalString += (id + " button changing colour on mouse hover from the right side &#10060;<br>")
-            errorLog.push(id + " button not moved to left side");
-            globalString += (id + " button moving back to left on click &#10060;<br>")
-        }
-  
+
         // checking if button removed from left side
         let foundLeft = false;
         for (let i = 0; i < left.length; i ++){
@@ -534,10 +529,43 @@ async function tester(fp, callback){
             }
         }
   
+        // if button not moved to right side, consequently points will be reduced for hovering on right side and moving back to left
+        if (foundRight == false){
+            errorLog.push(id + " button not moved to right side");
+            // globalString += (await button.getText() + " button moving to right side on click &#10060;<br>")
+            errorLog.push("The colour of " + id + " button is not changed on mouse hover when the button is on the right");
+            // globalString += (id + " button changing colour on mouse hover from the right side &#10060;<br>")
+            errorLog.push(id + " button not moved to left side");
+            // globalString += (id + " button moving back to left on click &#10060;<br>")
+
+            // console.log("Reached not found right")
+
+            let key = id.toLowerCase()
+            if (key == "html"){
+                htmlBuf += "Button moving to right side on click &#10060;<br>"
+                htmlBuf += "Button changing colour on mouse hover from the right side &#10060;<br>"
+                htmlBuf += "Button moving back to left on click &#10060;<br>"
+            }
+            else if(key == "css"){
+                cssBuf += "Button moving to right side on click &#10060;<br>"
+                cssBuf += "Button changing colour on mouse hover from the right side &#10060;<br>"
+                cssBuf += "Button moving back to left on click &#10060;<br>"
+            }
+            else if (key == "javascript"){
+                jsBuf += "Button moving to right side on click &#10060;<br>"
+                jsBuf += "Button changing colour on mouse hover from the right side &#10060;<br>"
+                jsBuf += "Button moving back to left on click &#10060;<br>"
+            }
+        }
+
+        if (foundLeft && foundRight){
+            htmlBuf += "Button moving to right side on click &#10060;<br>"
+            cssBuf += "Button moving to right side on click &#10060;<br>"
+            jsBuf += "Button moving to right side on click &#10060;<br>"
+        }
+  
         if (foundLeft){
             errorLog.push(id + " button not removed from left side");
-            
-
         }
   
         return (left.length == leftCount && right.length == rightCount && foundRight && foundLeft == false);
@@ -572,9 +600,7 @@ async function tester(fp, callback){
             }
         }
   
-        if (foundLeft == false){
-            errorLog.push(id + " button not moved to left side");
-        }
+        
   
         // checking if button removed from right side
         let foundRight = false;
@@ -583,6 +609,23 @@ async function tester(fp, callback){
             if (res.includes(id)){
                 foundRight = true;
             }
+        }
+
+
+        if (foundLeft == false || foundRight){
+            errorLog.push(id + " button not moved to left side");
+
+            let key = id.toLowerCase()
+            if (key == "html"){
+                htmlBuf += "Button moving to left side on click &#10060;<br>"
+            }
+            else if (key == "css"){
+                cssBuf += "Button moving to left side on click &#10060;<br>"
+            }
+            else if (key == "javascript"){
+                jsBuf += "Button moving to left side on click &#10060;<br>"
+            }
+
         }
   
         if (foundRight){
@@ -605,12 +648,12 @@ async function tester(fp, callback){
     */
     async function testSkills(){
 
-        let htmlBuf = "HTML: <br>"
-        let cssBuf = "CSS: <br>"
-        let jsBuf = "JavaScript: <br>"
+        
   
         let left = "left";
         let right = "right;"
+
+        globalString += "Skills: <br><br>"
   
         // testing hover
         let htmlButton = await driver.findElement(By.id("html"));
@@ -622,26 +665,26 @@ async function tester(fp, callback){
         let jsButton = await driver.findElement(By.id("javascript"));
         let jsCorrect = await hover(jsButton, left);
   
-        globalString += "Skills: <br><br>"
+        
         if (htmlCorrect){
               points = points + 1;
               globalArray[count] = true;
               count += 1;
-              globalString += "HTML button changing button colour on mouse hover &#9989;<br>"
+              htmlBuf += "Button changing colour on mouse hover &#9989;<br>"
         } 
         
         if (cssCorect){
               points = points + 1;
               globalArray[count] = true;
               count += 1;
-              globalString += "CSS button changing button colour on mouse hover &#9989;<br>"
+              cssBuf += "Button changing colour on mouse hover &#9989;<br>"
         } 
         
         if (jsCorrect){
               points = points + 1;
               globalArray[count] = true;
               count += 1;
-              globalString += "Javascript button changing button colour on mouse hover &#9989;<br>"
+              jsBuf += "Button changing colour on mouse hover &#9989;<br>"
         } 
         
         // testing moving to right from left
@@ -656,7 +699,7 @@ async function tester(fp, callback){
               moved = moved + 1;
               globalArray[count] = true;
               count += 1;
-              globalString += "HTML button moving to right side on click &#9989;<br>"
+              htmlBuf += "Button moving to right side on click &#9989;<br>"
         }
     
         if (await moveRight("javascript", nLeftElems - moved, nRightElems + moved, parent)){
@@ -664,7 +707,7 @@ async function tester(fp, callback){
               moved = moved + 1;
               globalArray[count] = true;
               count += 1;
-              globalString += "Javascript button moving to right side on click &#9989;<br>"
+              jsBuf += "Button moving to right side on click &#9989;<br>"
         }
         
         if (await moveRight("css", nLeftElems - moved, nRightElems + moved, parent)){
@@ -672,7 +715,7 @@ async function tester(fp, callback){
               moved = moved + 1;
               globalArray[count] = true;
               count += 1;
-              globalString += "CSS button moving to right side on click &#9989;<br>"
+              cssBuf += "Button moving to right side on click &#9989;<br>"
         }
         
         let skillsOnRight = await getRightSkills();
@@ -683,9 +726,22 @@ async function tester(fp, callback){
                   points = points + 1;
                   globalArray[count] = true;
                   count += 1;
-                  globalString += (await (await skillsOnRight[i].getText()).toUpperCase()) + " button changing colour on mouse hover from the right side &#9989;<br>"
+                  let key = (await skillsOnRight[i].getText()).toLowerCase()
+
+                  if (key == "html"){
+                    htmlBuf += "Button changing colour on mouse hover from the right side &#9989;<br>"
+                  }
+                  else if (key == "css"){
+                    cssBuf += "Button changing colour on mouse hover from the right side &#9989;<br>"
+                  }
+                  else if (key == "javascript"){
+                    jsBuf += "Button changing colour on mouse hover from the right side &#9989;<br>"
+                  }
+                //   globalString += (await skillsOnRight[i].getText()).toUpperCase() + " button changing colour on mouse hover from the right side &#9989;<br>"
             }
         }
+
+        // console.log(cssBuf)
   
         // testing moving to left from right
         let leftC = (await getLeftSkills(parent)).length;
@@ -693,13 +749,28 @@ async function tester(fp, callback){
         for (let i = 0; i < skillsOnRight.length; i++){
             let buttonName = (await skillsOnRight[i].getText()).toLowerCase();
             if (await moveLeft(skillsOnRight[i], buttonName, (leftC + (i + 1)), (rightC - (i + 1)), parent)){
-                  points = points + 1;
-                  globalArray[count] = true;
-                  count += 1;
-                  globalString += buttonName.toUpperCase() + " button moving back to left on click &#9989;<br>"
+                    points = points + 1;
+                    globalArray[count] = true;
+                    count += 1;
+                    if (buttonName == "html"){
+                        htmlBuf += "Button moving back to left on click &#9989;<br>"
+                      }
+                      else if (buttonName == "css"){
+                        cssBuf += "Button moving back to left on click &#9989;<br>"
+                      }
+                      else if (buttonName == "javascript"){
+                        jsBuf += "Button moving back to left on click &#9989;<br>"
+                      }
+                //   globalString += buttonName.toUpperCase() + " button moving back to left on click &#9989;<br>"
             }
         }
+        globalString += htmlBuf
         globalString += "<br>"
+        globalString += cssBuf
+        globalString += "<br>"
+        globalString += jsBuf
+        globalString += "<br>"
+
     }
   
   
@@ -738,6 +809,8 @@ async function tester(fp, callback){
         await testName();
         await testTheme();
         await testSkills();
+        globalString += "<br><br>Final Points: " + points.toString();
+        globalString += "<div>"
         driver.quit();
 
         if (errorLog.length == 0){
@@ -755,6 +828,7 @@ async function tester(fp, callback){
     }
     else{
         driver.quit();
+        globalString = "An Id of an element in the original starter HTML code file has been removed or changed. Please check the html file"
         console.log("\nAn Id of an element in the original starter HTML code file has been removed or changed\n");
     }
     
