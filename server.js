@@ -13,7 +13,7 @@ const userRouter = require('./routes/results')
 app.post("/", (req, res) => {
     // cleaning variables each time POST request is recieved
     // globalString = ""
-    globalString = "<div  style='text-align:center'>";
+    globalString = "<div  style='text-align:center; left:25%; right:25%; position:absolute'>";
     htmlBuf = "<p style='font-size:20px'>HTML: <br></p>"
     cssBuf = "<p style='font-size:20px'>CSS: <br></p>"
     jsBuf = "<p style='font-size:20px'>JavaScript: <br></p>"
@@ -72,21 +72,17 @@ async function tester(fp, callback){
     // to remove log cluttering
     const chromeOptions = new ChromeOptions();
     chromeOptions.excludeSwitches('enable-logging');
+
+
+    // uncomment below to prevent chrome window from opening
+    // chromeOptions.headless();
   
+
     let driver = new webdriver.Builder()
         .forBrowser("chrome")
         .setChromeOptions(chromeOptions)
         .build();
 
-
-    
-    
-    
-    
-
-     
-    
-    
   
     /**
     * The function computes the age of the person based on the date of birth entered and the current date
@@ -132,7 +128,7 @@ async function tester(fp, callback){
         let prompt = await driver.findElement(By.id("nameOutput")).getText();
     
         // globalString += "Name: <br>"
-        globalString += "<p style='font-size:25px'>Name:</p>"
+        globalString += "<div style='background-color:#E0FFFF '><p style='font-size:25px'>Name</p>"
         // check if text has been changed due to click
         if (prompt != initial){  
             points = points + 1;
@@ -190,7 +186,7 @@ async function tester(fp, callback){
             globalString += "Displaying greeting with name when user clicks away when input box is non-empty &#10060;<br>"
         }
 
-        globalString += "<br>"
+        globalString += "</div><br>"
     
     }
   
@@ -214,7 +210,7 @@ async function tester(fp, callback){
         let prompt = await driver.findElement(By.id("ageOutput")).getText();
   
   
-        globalString += "<p style='font-size:25px'>Age:</p>"
+        globalString += "<div style='background-color:#E0FFFF;'><p style='font-size:25px'>Age</p>"
         // check if text has been changed due to click
         if (prompt != initial){
               points = points + 1;
@@ -296,6 +292,7 @@ async function tester(fp, callback){
               globalString += "Displaying greeting with correct age when user clicks away when input box is non-empty &#10060;<br>"
         }
 
+        globalString += "</div>"
         globalString += "<br>"
     }
   
@@ -390,12 +387,13 @@ async function tester(fp, callback){
     */
     async function testTheme(){
         // console.log(globalString)
-        globalString += "<p style='font-size:25px'>Theme: <br></p>"
+        globalString += "<div style='background-color:#E0FFFF;'><p style='font-size:25px'>Theme<br></p>"
         globalString += "<p style='font-size:20px'>Dark Mode:</p>"
         await testMode("dark");
         globalString += "<br>"
         globalString += "<p style='font-size:20px'>Light Mode:</p>"
         await testMode("light");
+        globalString += "</div>"
         globalString += "<br>"
         // console.log(globalString)
     }
@@ -635,7 +633,7 @@ async function tester(fp, callback){
         let left = "left";
         let right = "right;"
 
-        globalString += "<p style='font-size:25px'>Skills: <br></p>"
+        globalString += "<div style='background-color:#E0FFFF;'><p style='font-size:25px'>Skills<br></p>"
   
         // testing hover
         let htmlButton = await driver.findElement(By.id("html"));
@@ -751,6 +749,7 @@ async function tester(fp, callback){
         globalString += cssBuf
         globalString += "<br>"
         globalString += jsBuf
+        globalString += "</div>"
         globalString += "<br>"
 
     }
@@ -847,6 +846,5 @@ async function tester(fp, callback){
     driver.quit();
     callback();
   }
-  
   
  
