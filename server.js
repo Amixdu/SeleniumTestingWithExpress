@@ -81,7 +81,7 @@ async function tester(fp, callback){
 
 
     // uncomment below to prevent chrome window from opening
-    // chromeOptions.headless();
+    chromeOptions.headless();
   
 
     let driver = new webdriver.Builder()
