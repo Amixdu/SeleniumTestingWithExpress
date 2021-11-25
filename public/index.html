@@ -4,6 +4,8 @@
     <meta charset="utf-8"/>
     <title>DIEM Javascript Challenge Tester Main Page</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     <style>
       * {
       box-sizing: border-box;
@@ -14,7 +16,7 @@
       margin: 0;
       font-family: Roboto, Arial, sans-serif;
       font-size: 14px; 
-      color: #666;
+      color: #0c20c9;
       }
       input, textarea { 
       outline: none;
@@ -110,14 +112,14 @@
       margin-top: 20px;
       border-radius: 20px;
       border: none;
-      border-bottom: 4px solid #3e4f24;
+      border-bottom: 4px solid #1b6ec0;
       background: #3986c5; 
       font-size: 16px;
       font-weight: 400;
       color: #fff;
       }
       button:hover {
-      background: #536e2b;
+      background: #0b2474;
       } 
       @media (min-width: 568px) {
       form {
@@ -154,7 +156,9 @@
     </script>
   </head>
   <body>
-    <div id = "loading" class = "loading"><p></p></div>
+    <div class="spinner-grow text-light" role="status" id="loading" style="display: none; height: 3em; width: 3em;">
+      <span class="visually-hidden">Loading...</span>
+    </div>
     <form action = "/" method = "POST" class="decor" id = "content">
       <div class="form-left-decoration"></div>
       <div class="form-right-decoration"></div>
@@ -164,11 +168,6 @@
         <input type = "text" name = "filePath" placeholder="Please Enter File Path"/>
         <button type = "submit" onclick="loading()"> Submit </button>
     </form>
-
- 
-     
-   
-    
     <script src="client.js"></script>
   </body>
 </html>
