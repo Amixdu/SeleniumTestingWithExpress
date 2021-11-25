@@ -12,7 +12,7 @@ const userRouter = require('./routes/results')
 
 app.post("/", (req, res) => {
     // cleaning variables each time POST request is recieved
-    globalString = "<div  style='text-align:center; left:25%; right:25%; position:absolute'>";
+    globalString = "<body style = 'background-color:#2f6fa3'><div style='text-align:center; left:25%; right:25%; position:absolute; background-color:#2f6fa3'>";
     htmlBuf = "<p style='font-size:20px'>HTML: <br></p>"
     cssBuf = "<p style='font-size:20px'>CSS: <br></p>"
     jsBuf = "<p style='font-size:20px'>JavaScript: <br></p>"
@@ -48,12 +48,12 @@ app.listen(PORT, function(err){
 
 var globalArray = [];
 var count = 0;
-var globalString = "<div style='background:blue;'>";
+var globalString = "";
 
 // globalString += "<p style='font-size:25px'>Name: <br></p>"
-var htmlBuf = "<p style='font-size:20px'>HTML: <br></p>"
-var cssBuf = "<p style='font-size:20px'>CSS: <br></p>"
-var jsBuf = "<p style='font-size:20px'>JavaScript: <br></p>"
+var htmlBuf = ""
+var cssBuf = ""
+var jsBuf = ""
 
 // CODE BELOW IS THE SELEINUM AUTOMATED TESTER
 async function tester(fp, callback){
@@ -71,7 +71,7 @@ async function tester(fp, callback){
 
     const RIGHT = "right"
     const LEFT = "left"
-    const COLOR = "#87CEEB"
+    const COLOR = "#D6EAF8"
   
   
     // to remove log cluttering
@@ -857,7 +857,6 @@ async function tester(fp, callback){
         
 
         globalString += "</div>"
-        globalString += "<br>"
 
     }
 
@@ -942,20 +941,22 @@ async function tester(fp, callback){
             await testTheme();
             await testSkills();
             
-            globalString += "<p style='font-size:20px'> <br><br>Final Points: " + points.toString() + "/26 </p>";
-            globalString += "</div>"
+            globalString += "<p style='font-size:35px; color:white'> <br><br>Final Points: " + points.toString() + "/26 </p>";
+            globalString += "</div></body>"
 
-            if (errorLog.length == 0){
-                console.log("Final Score: " + points + "/26 (Full Points)");
-            }
-            else{
-                console.log("\nFinal Score: " + points + "/26");
-                // console.log("\nError Log: ");
-                // for (let i = 0; i < errorLog.length; i++){
-                //     console.log(errorLog[i]);
-                // }
-                console.log("\n");
-            }
+            console.log("Final Score: " + points + "/26 (Full Points)");
+
+            // if (errorLog.length == 0){
+                
+            // }
+            // else{
+            //     console.log("\nFinal Score: " + points + "/26");
+            //     // console.log("\nError Log: ");
+            //     // for (let i = 0; i < errorLog.length; i++){
+            //     //     console.log(errorLog[i]);
+            //     // }
+            //     console.log("\n");
+            // }
             
         }
         else{
