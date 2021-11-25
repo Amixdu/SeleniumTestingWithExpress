@@ -123,19 +123,52 @@
       form {
       width: 60%;
       }
+      .loading{
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #3498db;
+        width: 120px;
+        height: 120px;
+        -webkit-animation: spin 2s linear infinite; /* Safari */
+        animation: spin 2s linear infinite;
+        display: none;
+      }
+      }
+      /* Safari */
+      @-webkit-keyframes spin {
+        0% { -webkit-transform: rotate(0deg); }
+        100% { -webkit-transform: rotate(360deg); }
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
     </style>
+
+    <script>
+      function loading(){
+        document.getElementById("loading").style.display = 'block';
+        document.getElementById("content").style.display = 'none';
+      }
+    </script>
   </head>
   <body>
-    <form action = "/" method = "POST" class="decor">
+    <div id = "loading" class = "loading"><p></p></div>
+    <form action = "/" method = "POST" class="decor" id = "content">
       <div class="form-left-decoration"></div>
       <div class="form-right-decoration"></div>
       <div class="circle"></div>
       <div class="form-inner">
         <h1 style="text-align: center;">WELCOME TO THE TESTER OF THE DIEM JAVASCRIPT CHALLENGE!!!</h1>
         <input type = "text" name = "filePath" placeholder="Please Enter File Path"/>
-        <button type = "submit"> Submit </button>
+        <button type = "submit" onclick="loading()"> Submit </button>
     </form>
+
+ 
+     
+   
+    
     <script src="client.js"></script>
   </body>
 </html>
