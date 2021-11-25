@@ -12,7 +12,7 @@ const userRouter = require('./routes/results')
 
 app.post("/", (req, res) => {
     // cleaning variables each time POST request is recieved
-    globalString = "<body style = 'background-color:#2f6fa3'><div style='text-align:center; left:25%; right:25%; position:absolute; background-color:#2f6fa3'>";
+    globalString = "<body style = 'background-color:#2f6fa3'><div style='text-align:left; left:25%; right:25%; position:absolute; background-color:#2f6fa3'>";
     htmlBuf = "<p style='font-size:20px'>HTML: <br></p>"
     cssBuf = "<p style='font-size:20px'>CSS: <br></p>"
     jsBuf = "<p style='font-size:20px'>JavaScript: <br></p>"
@@ -132,7 +132,7 @@ async function tester(fp, callback){
         // obtain the value displayed on the right side
         let prompt = await driver.findElement(By.id("nameOutput")).getText();
 
-        globalString += "<div style='background-color:" + COLOR + "'><p style='font-size:25px'>Name</p>"
+        globalString += "<div style='padding-left: 25px; padding-bottom: 25px; padding-top:3px; background-color:" + COLOR + "'><p style='font-size:25px'>Name</p>"
         // check if text has been changed due to click
         if (prompt != initial){  
             points = points + 1;
@@ -214,7 +214,7 @@ async function tester(fp, callback){
         let prompt = await driver.findElement(By.id("ageOutput")).getText();
   
   
-        globalString += "<div style='background-color:" + COLOR + "'><p style='font-size:25px'>Age</p>"
+        globalString += "<div style='padding-left: 25px; padding-bottom: 25px; padding-top:3px; background-color:" + COLOR + "'><p style='font-size:25px'>Age</p>"
         // check if text has been changed due to click
         if (prompt != initial){
               points = points + 1;
@@ -395,7 +395,7 @@ async function tester(fp, callback){
         * of the challenge works properly for both modes.
     */
     async function testTheme(){
-        globalString += "<div style='background-color:" + COLOR + "'><p style='font-size:25px'>Theme</p>"
+        globalString += "<div style='padding-left: 25px; padding-bottom: 25px; padding-top:3px; background-color:" + COLOR + "'><p style='font-size:25px'>Theme</p>"
         globalString += "<p style='font-size:20px'>Dark Mode:</p>"
         await testMode("dark");
         globalString += "<br>"
@@ -684,7 +684,7 @@ async function tester(fp, callback){
         let left = "left";
         let right = "right;"
 
-        globalString += "<div style='background-color:" + COLOR + "'><p style='font-size:25px'>Skills</p>"
+        globalString += "<div style='padding-left: 25px; padding-bottom: 25px; padding-top:3px; background-color:" + COLOR + "'><p style='font-size:25px'>Skills</p>"
   
         // testing hover
         let htmlButton = await driver.findElement(By.id("html"));
