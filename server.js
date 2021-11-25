@@ -20,12 +20,14 @@ app.post("/", (req, res) => {
 
     var isValid = true
     if (isValid) {
-        tester(req.body.filePath, function() {
-            res.send(globalString)
-        })
-        // .catch(
-        //     console.log("CAUGHT ================================================")
-        // )
+        try{
+            tester(req.body.filePath, function() {
+                res.send(globalString)
+            })
+        }
+        catch{
+            res.send("There was a problem with the selected file. Please try again.")
+        }
     }
     else{
         console.log("Error")
