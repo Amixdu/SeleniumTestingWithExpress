@@ -12,7 +12,6 @@ const userRouter = require('./routes/results')
 
 app.post("/", (req, res) => {
     // cleaning variables each time POST request is recieved
-    // globalString = ""
     globalString = "<div  style='text-align:center; left:25%; right:25%; position:absolute'>";
     htmlBuf = "<p style='font-size:20px'>HTML: <br></p>"
     cssBuf = "<p style='font-size:20px'>CSS: <br></p>"
@@ -121,9 +120,9 @@ async function tester(fp, callback){
      async function testName(){
 
         // test click
-    
+        
         // get text before click
-        let initial = driver.findElement(By.id("nameOutput")).getText();
+        let initial = await driver.findElement(By.id("nameOutput")).getText();
     
         // clicking name
         await driver.findElement(By.id("name")).click();
@@ -132,9 +131,7 @@ async function tester(fp, callback){
     
         // obtain the value displayed on the right side
         let prompt = await driver.findElement(By.id("nameOutput")).getText();
-    
-        // globalString += "Name: <br>"
-        // globalString += "<div style='background-color: '><p style='font-size:25px'>Name</p>"
+
         globalString += "<div style='background-color:" + COLOR + "'><p style='font-size:25px'>Name</p>"
         // check if text has been changed due to click
         if (prompt != initial){  
@@ -150,10 +147,10 @@ async function tester(fp, callback){
     
         // test no input and unfocus
         // click name box
-        driver.findElement(By.id("name")).click();
+        await driver.findElement(By.id("name")).click();
     
         // blur
-        driver.findElement(By.css("body")).click();
+        await driver.findElement(By.css("body")).click();
     
         // get text on input box
         let reqPrompt = await driver.findElement(By.id("nameOutput")).getText();
@@ -210,7 +207,7 @@ async function tester(fp, callback){
     async function testBirthday(){
   
         // get text before click
-        let initial = driver.findElement(By.id("ageOutput")).getText();
+        let initial = await driver.findElement(By.id("ageOutput")).getText();
         // clicking birthday
         await driver.findElement(By.id("date")).click();
         // obtain the value displayed on the right side
@@ -231,9 +228,9 @@ async function tester(fp, callback){
         }
   
         // click birthday box
-        driver.findElement(By.id("date")).click();
+        await driver.findElement(By.id("date")).click();
         // blur
-        driver.findElement(By.css("body")).click();
+        await driver.findElement(By.css("body")).click();
         // get text on input box
         let reqPrompt = await driver.findElement(By.id("ageOutput")).getText();
   
@@ -282,23 +279,28 @@ async function tester(fp, callback){
   
         var stat = false;
   
-        for (let i = 0; i < ageGotten.length; i++) {
-            if (stat == false && ageGotten[i] == correctAge) {
-                stat = true
+        try{
+            for (let i = 0; i < ageGotten.length; i++) {
+                if (stat == false && ageGotten[i] == correctAge) {
+                    stat = true
+                }
+            }
+            
+            if (stat){
+                  points = points + 1;
+                  globalArray[count] = true;
+                  count += 1;
+                  globalString += "Displaying greeting with correct age when user clicks away when input box is non-empty &#9989;<br>"
+            }
+            else {
+                  errorLog.push("Age is not displayed correctly");
+                  globalString += "Displaying greeting with correct age when user clicks away when input box is non-empty &#10060;<br>"
             }
         }
+        catch{
+            globalString += "Displaying greeting with correct age when user clicks away when input box is non-empty &#10060;<br>"
+        }
         
-        if (stat){
-              points = points + 1;
-              globalArray[count] = true;
-              count += 1;
-              globalString += "Displaying greeting with correct age when user clicks away when input box is non-empty &#9989;<br>"
-        }
-        else {
-              errorLog.push("Age is not displayed correctly");
-              globalString += "Displaying greeting with correct age when user clicks away when input box is non-empty &#10060;<br>"
-        }
-
         globalString += "</div>"
         globalString += "<br>"
     }
@@ -393,7 +395,6 @@ async function tester(fp, callback){
         * of the challenge works properly for both modes.
     */
     async function testTheme(){
-        // console.log(globalString)
         globalString += "<div style='background-color:" + COLOR + "'><p style='font-size:25px'>Theme</p>"
         globalString += "<p style='font-size:20px'>Dark Mode:</p>"
         await testMode("dark");
@@ -402,7 +403,6 @@ async function tester(fp, callback){
         await testMode("light");
         globalString += "</div>"
         globalString += "<br>"
-        // console.log(globalString)
     }
   
   
@@ -443,7 +443,6 @@ async function tester(fp, callback){
         }
         else{
             errorLog.push("The colour of " + await button.getText() + " button is not changed on mouse hover when the button is on the " + side);
-            // globalString += (await button.getText().toUpperCase() + " button changing button colour on mouse hover &#10060;<br>")
             let key = (await button.getText()).toLowerCase();
             if (key == "html"){
                 htmlBuf += "Button changing colour on mouse hover from the " + side + " side &#10060;<br>"
@@ -522,13 +521,9 @@ async function tester(fp, callback){
         // if button not moved to right side, consequently points will be reduced for hovering on right side and moving back to left
         if (foundRight == false){
             errorLog.push(id + " button not moved to right side");
-            // globalString += (await button.getText() + " button moving to right side on click &#10060;<br>")
             errorLog.push("The colour of " + id + " button is not changed on mouse hover when the button is on the right");
-            // globalString += (id + " button changing colour on mouse hover from the right side &#10060;<br>")
             errorLog.push(id + " button not moved to left side");
-            // globalString += (id + " button moving back to left on click &#10060;<br>")
-
-            // console.log("Reached not found right")
+            
 
             let key = id.toLowerCase()
             if (key == "html"){
@@ -631,6 +626,15 @@ async function tester(fp, callback){
 
 
 
+    /**
+        * This function checks if the order of skill buttons when moved is the same as clicking order
+        * @param {The first button element to be clicked} button1 
+        * @param {The second button element to be clicked} button2 
+        * @param {The third button element to be clicked} button3 
+        * @param {Html element that is used to obtain the element count} handle 
+        * @param {Indicates clicking from left or right} side
+        * @returns A boolean value indicating if the provided button was successfully moved
+    */
     async function testOrder(button1, button2, button3, handle, side){
         let button1Name = (await button1.getText()).toLowerCase()
         let button2Name = (await button2.getText()).toLowerCase()
@@ -639,8 +643,6 @@ async function tester(fp, callback){
         await button1.click()
         await button2.click()
         await button3.click()
-
-        
 
         let elems
         let btnList;
@@ -720,8 +722,6 @@ async function tester(fp, callback){
         // obtain left side buttons handle using html button and use this handle for tracking all three buttons on the left
         let element = await driver.findElement(By.id("html"));
         let parent = await element.findElement(By.xpath("./.."));
-        let nLeftElems = (await getLeftElems(parent)).length;
-        let nRightElems = (await getRightElems()).length;
         let numButtons = 3;
         let moved = 1;
         if (await moveRight("html", numButtons-1, 1, parent)){
@@ -774,8 +774,6 @@ async function tester(fp, callback){
         // console.log(cssBuf)
   
         // testing moving to left from right
-        let leftC = (await getLeftElems(parent)).length;
-        let rightC = (await getRightElems()).length;
         numButtons = 3;
         for (let i = 0; i < skillsOnRight.length; i++){
             let buttonName = (await skillsOnRight[i].getText()).toLowerCase();
@@ -806,42 +804,57 @@ async function tester(fp, callback){
         globalString += "<p style='font-size:20px'>Additional Points:</p>"
 
         // testing button ordering when moving
-        let leftElems = await getLeftElems(parent)
-        let leftBtns = await getButtons(leftElems)
-        let test1L = await testOrder(leftBtns[0], leftBtns[1], leftBtns[2], parent, LEFT)
-        let rightElems = await getRightElems();
-        let rightBtns = await getButtons(rightElems)
-        let test1R = await testOrder(rightBtns[0], rightBtns[1], rightBtns[2], parent, RIGHT)
 
-        leftElems = await getLeftElems(parent)
-        leftBtns = await getButtons(leftElems)
-        let test2L = await testOrder(leftBtns[1], leftBtns[2], leftBtns[0], parent, LEFT)
-        rightElems = await getRightElems();
-        rightBtns = await getButtons(rightElems)
-        let test2R = await testOrder(rightBtns[1], rightBtns[2], rightBtns[0], parent, RIGHT)
+        try{
+            let leftElems = await getLeftElems(parent)
+            let leftBtns = await getButtons(leftElems)
+            let test1L = await testOrder(leftBtns[0], leftBtns[1], leftBtns[2], parent, LEFT)
+            let rightElems = await getRightElems();
+            let rightBtns = await getButtons(rightElems)
+            let test1R = await testOrder(rightBtns[0], rightBtns[1], rightBtns[2], parent, RIGHT)
 
-        leftElems = await getLeftElems(parent)
-        leftBtns = await getButtons(leftElems)
-        let test3L = await testOrder(leftBtns[2], leftBtns[1], leftBtns[0], parent, LEFT)
-        rightElems = await getRightElems();
-        rightBtns = await getButtons(rightElems)
-        let test3R = await testOrder(rightBtns[2], rightBtns[1], rightBtns[0], parent, RIGHT)
+            leftElems = await getLeftElems(parent)
+            leftBtns = await getButtons(leftElems)
+            let test2L = await testOrder(leftBtns[1], leftBtns[2], leftBtns[0], parent, LEFT)
+            rightElems = await getRightElems();
+            rightBtns = await getButtons(rightElems)
+            let test2R = await testOrder(rightBtns[1], rightBtns[2], rightBtns[0], parent, RIGHT)
+
+            leftElems = await getLeftElems(parent)
+            leftBtns = await getButtons(leftElems)
+            let test3L = await testOrder(leftBtns[2], leftBtns[1], leftBtns[0], parent, LEFT)
+            rightElems = await getRightElems();
+            rightBtns = await getButtons(rightElems)
+            let test3R = await testOrder(rightBtns[2], rightBtns[1], rightBtns[0], parent, RIGHT)
 
 
-        if (test1L && test2L && test3L){
-            points = points + 1;
-            globalArray[count] = true;
-            count += 1;
-            globalString += "Ordering of buttons is the same order in which buttons clicked when moving to right &#9989;<br>"
+            if (test1L && test2L && test3L){
+                points = points + 1;
+                globalArray[count] = true;
+                count += 1;
+                globalString += "Ordering of buttons is the same order in which buttons clicked when moving to right &#9989;<br>"
+            }
+            else{
+                globalString += "Ordering of buttons is the same order in which buttons clicked when moving to right &#10060;<br>"
+            }
+
+
+            if (test1R && test2R && test3R){
+                points = points + 1;
+                globalArray[count] = true;
+                count += 1;
+                globalString += "Ordering of buttons is the same order in which buttons clicked when moving back to left &#9989;<br>"
+            }
+            else{
+                globalString += "Ordering of buttons is the same order in which buttons clicked when moving back to left &#10060;<br>"
+            }
+
+            }
+        catch{
+            globalString += "Ordering of buttons is the same order in which buttons clicked when moving to right &#10060;<br>"
+            globalString += "Ordering of buttons is the same order in which buttons clicked when moving to right &#10060;<br>"
         }
-
-
-        if (test1R && test2R && test3R){
-            points = points + 1;
-            globalArray[count] = true;
-            count += 1;
-            globalString += "Ordering of buttons is the same order in which buttons clicked when moving back to left &#9989;<br>"
-        }
+        
 
         globalString += "</div>"
         globalString += "<br>"
@@ -849,6 +862,10 @@ async function tester(fp, callback){
     }
 
 
+    /**
+        * function that filtersnon button elements from a list of html elements
+        * @returns A list of buttons
+    */
     async function getButtons(elemList){
         let btns = []
         
@@ -858,7 +875,6 @@ async function tester(fp, callback){
                 btns.push(elemList[i])
             }
         }
-
         return btns
     }
   
@@ -920,10 +936,12 @@ async function tester(fp, callback){
         driver.get(FILE_PATH);
 
         if (await validateFile() == true){
+
             await testName();
             await testBirthday();
             await testTheme();
             await testSkills();
+            
             globalString += "<p style='font-size:20px'> <br><br>Final Points: " + points.toString() + "/26 </p>";
             globalString += "</div>"
 
@@ -932,10 +950,10 @@ async function tester(fp, callback){
             }
             else{
                 console.log("\nFinal Score: " + points + "/26");
-                console.log("\nError Log: ");
-                for (let i = 0; i < errorLog.length; i++){
-                    console.log(errorLog[i]);
-                }
+                // console.log("\nError Log: ");
+                // for (let i = 0; i < errorLog.length; i++){
+                //     console.log(errorLog[i]);
+                // }
                 console.log("\n");
             }
             
