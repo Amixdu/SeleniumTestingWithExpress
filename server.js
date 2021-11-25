@@ -67,6 +67,10 @@ async function tester(fp, callback){
     const webdriver = require('selenium-webdriver');
     var points = 0;
     var errorLog = [];
+
+    const RIGHT = "right"
+    const LEFT = "left"
+    const COLOR = "#87CEEB"
   
   
     // to remove log cluttering
@@ -128,7 +132,8 @@ async function tester(fp, callback){
         let prompt = await driver.findElement(By.id("nameOutput")).getText();
     
         // globalString += "Name: <br>"
-        globalString += "<div style='background-color:#E0FFFF '><p style='font-size:25px'>Name</p>"
+        // globalString += "<div style='background-color: '><p style='font-size:25px'>Name</p>"
+        globalString += "<div style='background-color:" + COLOR + "'><p style='font-size:25px'>Name</p>"
         // check if text has been changed due to click
         if (prompt != initial){  
             points = points + 1;
@@ -210,7 +215,7 @@ async function tester(fp, callback){
         let prompt = await driver.findElement(By.id("ageOutput")).getText();
   
   
-        globalString += "<div style='background-color:#E0FFFF;'><p style='font-size:25px'>Age</p>"
+        globalString += "<div style='background-color:" + COLOR + "'><p style='font-size:25px'>Age</p>"
         // check if text has been changed due to click
         if (prompt != initial){
               points = points + 1;
@@ -387,7 +392,7 @@ async function tester(fp, callback){
     */
     async function testTheme(){
         // console.log(globalString)
-        globalString += "<div style='background-color:#E0FFFF;'><p style='font-size:25px'>Theme<br></p>"
+        globalString += "<div style='background-color:" + COLOR + "'><p style='font-size:25px'>Theme</p>"
         globalString += "<p style='font-size:20px'>Dark Mode:</p>"
         await testMode("dark");
         globalString += "<br>"
@@ -456,7 +461,7 @@ async function tester(fp, callback){
         * This function obtains the current skill buttons present on the right side div
         * @returns An array of button elements
     */
-    async function getRightSkills(){
+    async function getRightElems(){
         let skills = await driver.findElement(By.id('skillsOutput'));
         let skillsArray = await skills.findElements(By.xpath(".//*"));
         return skillsArray;
@@ -466,7 +471,7 @@ async function tester(fp, callback){
         * This function obtains the current skill buttons present on the left side div
         * @returns An array of button elements
     */
-    async function getLeftSkills(handle){
+    async function getLeftElems(handle){
         let leftSkillsArray = await handle.findElements(By.xpath(".//*"));
         return leftSkillsArray;
     }
@@ -488,8 +493,11 @@ async function tester(fp, callback){
         await button.click();
   
         // get skills on both sides
-        let right = await getRightSkills();
-        let left = await getLeftSkills(handle);
+        let right = await getRightElems();
+        let left = await getLeftElems(handle);
+
+        let leftBtns = (await getButtons(left)).length
+        let rightBtns = (await getButtons(right)).length
   
         // checking if button moved to right side
         let foundRight = false;
@@ -547,8 +555,9 @@ async function tester(fp, callback){
         if (foundLeft){
             errorLog.push(id + " button not removed from left side");
         }
+
   
-        return (left.length == leftCount && right.length == rightCount && foundRight && foundLeft == false);
+        return (leftBtns == leftCount && rightBtns == rightCount && foundRight && foundLeft == false);
     }
   
   
@@ -568,10 +577,13 @@ async function tester(fp, callback){
         await button.click();
   
         // get skills on both sides
-        let right = await getRightSkills();
-        let left = await getLeftSkills(handle);
+        let right = await getRightElems();
+        let left = await getLeftElems(handle);
+
+        let leftBtns = (await getButtons(left)).length
+        let rightBtns = (await getButtons(right)).length
   
-        // checking if button moved to right side
+        // checking if button moved to left side
         let foundLeft = false;
         for (let i = 0; i < left.length; i ++){
             let res = (await left[i].getText()).toLowerCase();
@@ -612,7 +624,44 @@ async function tester(fp, callback){
             errorLog.push(id + " button not removed from right side");
         }
   
-        return (left.length == leftCount && right.length == rightCount && foundLeft && foundRight == false);
+        return (leftBtns == leftCount && rightBtns == rightCount && foundLeft && foundRight == false);
+    }
+
+
+
+    async function testOrder(button1, button2, button3, handle, side){
+        let button1Name = (await button1.getText()).toLowerCase()
+        let button2Name = (await button2.getText()).toLowerCase()
+        let button3Name = (await button3.getText()).toLowerCase()
+        let inputBtnList = [button1Name, button2Name, button3Name]
+        await button1.click()
+        await button2.click()
+        await button3.click()
+
+        
+
+        let elems
+        let btnList;
+        if (side == LEFT){
+            elems = await getLeftElems(handle)
+            btnList = await getButtons(elems)
+
+        }
+        else{
+            elems = await getRightElems()
+            btnList = await getButtons(elems)
+        }
+        
+        let correctOrder = true
+        for (let i = 0; i < btnList.length; i++){
+            let buttonName = (await btnList[i].getText()).toLowerCase();
+            if (buttonName != inputBtnList[i]){
+                correctOrder = false
+            }
+        }
+
+        return correctOrder
+
     }
   
   
@@ -627,13 +676,11 @@ async function tester(fp, callback){
         * 4. moving buttons back to left on click
     */
     async function testSkills(){
-
-        
   
         let left = "left";
         let right = "right;"
 
-        globalString += "<div style='background-color:#E0FFFF;'><p style='font-size:25px'>Skills<br></p>"
+        globalString += "<div style='background-color:" + COLOR + "'><p style='font-size:25px'>Skills</p>"
   
         // testing hover
         let htmlButton = await driver.findElement(By.id("html"));
@@ -671,10 +718,11 @@ async function tester(fp, callback){
         // obtain left side buttons handle using html button and use this handle for tracking all three buttons on the left
         let element = await driver.findElement(By.id("html"));
         let parent = await element.findElement(By.xpath("./.."));
-        let nLeftElems = (await getLeftSkills(parent)).length;
-        let nRightElems = (await getRightSkills()).length;
+        let nLeftElems = (await getLeftElems(parent)).length;
+        let nRightElems = (await getRightElems()).length;
+        let numButtons = 3;
         let moved = 1;
-        if (await moveRight("html", nLeftElems - moved, nRightElems + moved, parent)){
+        if (await moveRight("html", numButtons-1, 1, parent)){
               points = points + 1;
               moved = moved + 1;
               globalArray[count] = true;
@@ -682,7 +730,7 @@ async function tester(fp, callback){
               htmlBuf += "Button moving to right side on click &#9989;<br>"
         }
     
-        if (await moveRight("javascript", nLeftElems - moved, nRightElems + moved, parent)){
+        if (await moveRight("javascript", numButtons-2, 2, parent)){
               points = points + 1;
               moved = moved + 1;
               globalArray[count] = true;
@@ -690,7 +738,7 @@ async function tester(fp, callback){
               jsBuf += "Button moving to right side on click &#9989;<br>"
         }
         
-        if (await moveRight("css", nLeftElems - moved, nRightElems + moved, parent)){
+        if (await moveRight("css", numButtons-3, 3, parent)){
               points = points + 1;
               moved = moved + 1;
               globalArray[count] = true;
@@ -698,7 +746,7 @@ async function tester(fp, callback){
               cssBuf += "Button moving to right side on click &#9989;<br>"
         }
         
-        let skillsOnRight = await getRightSkills();
+        let skillsOnRight = await getRightElems();
         
         // testing hover on right side
         for (let i = 0; i < skillsOnRight.length; i++){
@@ -724,11 +772,12 @@ async function tester(fp, callback){
         // console.log(cssBuf)
   
         // testing moving to left from right
-        let leftC = (await getLeftSkills(parent)).length;
-        let rightC = (await getRightSkills()).length;
+        let leftC = (await getLeftElems(parent)).length;
+        let rightC = (await getRightElems()).length;
+        numButtons = 3;
         for (let i = 0; i < skillsOnRight.length; i++){
             let buttonName = (await skillsOnRight[i].getText()).toLowerCase();
-            if (await moveLeft(skillsOnRight[i], buttonName, (leftC + (i + 1)), (rightC - (i + 1)), parent)){
+            if (await moveLeft(skillsOnRight[i], buttonName, ((i + 1)), (numButtons - (i + 1)), parent)){
                     points = points + 1;
                     globalArray[count] = true;
                     count += 1;
@@ -744,14 +793,71 @@ async function tester(fp, callback){
                 //   globalString += buttonName.toUpperCase() + " button moving back to left on click &#9989;<br>"
             }
         }
+
         globalString += htmlBuf
         globalString += "<br>"
         globalString += cssBuf
         globalString += "<br>"
         globalString += jsBuf
+        globalString += "<br>"
+
+        globalString += "<p style='font-size:20px'>Additional Points:</p>"
+
+        // testing button ordering when moving
+        let leftElems = await getLeftElems(parent)
+        let leftBtns = await getButtons(leftElems)
+        let test1L = await testOrder(leftBtns[0], leftBtns[1], leftBtns[2], parent, LEFT)
+        let rightElems = await getRightElems();
+        let rightBtns = await getButtons(rightElems)
+        let test1R = await testOrder(rightBtns[0], rightBtns[1], rightBtns[2], parent, RIGHT)
+
+        leftElems = await getLeftElems(parent)
+        leftBtns = await getButtons(leftElems)
+        let test2L = await testOrder(leftBtns[1], leftBtns[2], leftBtns[0], parent, LEFT)
+        rightElems = await getRightElems();
+        rightBtns = await getButtons(rightElems)
+        let test2R = await testOrder(rightBtns[1], rightBtns[2], rightBtns[0], parent, RIGHT)
+
+        leftElems = await getLeftElems(parent)
+        leftBtns = await getButtons(leftElems)
+        let test3L = await testOrder(leftBtns[2], leftBtns[1], leftBtns[0], parent, LEFT)
+        rightElems = await getRightElems();
+        rightBtns = await getButtons(rightElems)
+        let test3R = await testOrder(rightBtns[2], rightBtns[1], rightBtns[0], parent, RIGHT)
+
+
+        if (test1L && test2L && test3L){
+            points = points + 1;
+            globalArray[count] = true;
+            count += 1;
+            globalString += "Ordering of buttons is the same order in which buttons clicked when moving to right &#9989;<br>"
+        }
+
+
+        if (test1R && test2R && test3R){
+            points = points + 1;
+            globalArray[count] = true;
+            count += 1;
+            globalString += "Ordering of buttons is the same order in which buttons clicked when moving back to left &#9989;<br>"
+        }
+
         globalString += "</div>"
         globalString += "<br>"
 
+    }
+
+
+    async function getButtons(elemList){
+        let btns = []
+        
+        for (let i = 0; i < elemList.length; i ++){
+            let type = await elemList[i].getTagName()
+            if (type == "button"){
+                btns.push(elemList[i])
+            }
+        }
+
+        return btns
     }
   
   
@@ -799,7 +905,6 @@ async function tester(fp, callback){
     let pathErr = false
     let first = fp.split(':')[0]
 
-
     if (first.length == fp.length){
         pathErr = true
     }
@@ -817,14 +922,14 @@ async function tester(fp, callback){
             await testBirthday();
             await testTheme();
             await testSkills();
-            globalString += "<p style='font-size:20px'> <br><br>Final Points: " + points.toString() + "/24 </p>";
+            globalString += "<p style='font-size:20px'> <br><br>Final Points: " + points.toString() + "/26 </p>";
             globalString += "</div>"
 
             if (errorLog.length == 0){
-                console.log("Final Score: " + points + "/24 (Full Points)");
+                console.log("Final Score: " + points + "/26 (Full Points)");
             }
             else{
-                console.log("\nFinal Score: " + points + "/24");
+                console.log("\nFinal Score: " + points + "/26");
                 console.log("\nError Log: ");
                 for (let i = 0; i < errorLog.length; i++){
                     console.log(errorLog[i]);
@@ -840,11 +945,9 @@ async function tester(fp, callback){
     else{
         globalString = "Provided file path is invalid"
     }
-
-    
     
     driver.quit();
     callback();
   }
   
- 
+  
