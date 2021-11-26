@@ -12,10 +12,15 @@ const userRouter = require('./routes/results')
 
 app.post("/", (req, res) => {
     // cleaning variables each time POST request is recieved
-    globalString = "<body style = 'background-color:#2f6fa3'><div style='text-align:left; left:25%; right:25%; position:absolute; background-color:#2f6fa3'>";
-    htmlBuf = "<p style='font-size:20px'>HTML: <br></p>"
-    cssBuf = "<p style='font-size:20px'>CSS: <br></p>"
-    jsBuf = "<p style='font-size:20px'>JavaScript: <br></p>"
+    globalString = "";
+    
+    nameArray = []
+    ageArray = []
+    themeArray = []
+    skillsArray = []
+    htmlArr = []
+    cssArr= []
+    jsArr = []
 
     var isValid = true
     if (isValid) {
@@ -46,14 +51,18 @@ app.listen(PORT, function(err){
 
 
 
-var globalArray = [];
-var count = 0;
-var globalString = "";
 
-// globalString += "<p style='font-size:25px'>Name: <br></p>"
-var htmlBuf = ""
-var cssBuf = ""
-var jsBuf = ""
+var globalString ;
+
+var nameArray = []
+var ageArray = []
+var themeArray = []
+var skillsArray = []
+var htmlArr = []
+var cssArr= []
+var jsArr = []
+
+
 
 // CODE BELOW IS THE SELEINUM AUTOMATED TESTER
 async function tester(fp, callback){
@@ -66,6 +75,7 @@ async function tester(fp, callback){
   
     const { Options: ChromeOptions } = require('selenium-webdriver/chrome');
     const webdriver = require('selenium-webdriver');
+    const MAX_POINTS = 26
     var points = 0;
     var errorLog = [];
 
@@ -132,17 +142,13 @@ async function tester(fp, callback){
         // obtain the value displayed on the right side
         let prompt = await driver.findElement(By.id("nameOutput")).getText();
 
-        globalString += "<div style='padding-left: 25px; padding-bottom: 25px; padding-top:3px; background-color:" + COLOR + "'><p style='font-size:25px'>Name</p>"
         // check if text has been changed due to click
         if (prompt != initial){  
             points = points + 1;
-            globalArray[count] = false;
-            count += 1;
-            globalString += "Displaying prompt when input box clicked &#9989;<br>"
+            nameArray.push(["Displaying prompt when input box clicked", "&#9989"])
         }
         else{
-            errorLog.push("Initial prompt when name box is clicked (onfocus event) is not displayed");
-            globalString += "Displaying prompt when input box clicked &#10060;<br>"
+            nameArray.push(("Displaying prompt when input box clicked", "&#10060"))
         }
     
         // test no input and unfocus
@@ -158,13 +164,10 @@ async function tester(fp, callback){
         // check if blurring triggers a new message on text box
         if ((reqPrompt != initial) && (reqPrompt != prompt)){
             points = points + 1;
-            globalArray[count] = true;
-            count += 1;
-            globalString += "Displaying a request prompt when user clicks away when input box is empty &#9989;<br>"
+            nameArray.push(["Displaying a request prompt when user clicks away when input box is empty", "&#9989"])
         }
         else{
-            errorLog.push("The request prompt when user places cursor outside the name box (onblur event) while its empty is not displayed");
-            globalString += "Displaying a request prompt when user clicks away when input box is empty &#10060;<br>"
+            nameArray.push(["Displaying a request prompt when user clicks away when input box is empty", "&#10060"])
         }
         
         // test input and unfocus
@@ -181,13 +184,12 @@ async function tester(fp, callback){
         // check if output message includes the entered name ('TestName' was entered to the input so the same name should be included in greeting)
         if (nameOutput.includes("TestName")){
             points = points + 1;
-            globalArray[count] = true;
-            count += 1;
-            globalString += "Displaying greeting with name when user clicks away when input box is non-empty &#9989;<br>"
+            nameArray.push(["Displaying greeting with name when user clicks away when input box is non-empty", "&#9989"])
         }
         else{
             errorLog.push("Greeting with name not displayed correctly");
             globalString += "Displaying greeting with name when user clicks away when input box is non-empty &#10060;<br>"
+            nameArray.push(["Displaying greeting with name when user clicks away when input box is non-empty", "&#10060"])
         }
 
         globalString += "</div><br>"
@@ -217,14 +219,13 @@ async function tester(fp, callback){
         globalString += "<div style='padding-left: 25px; padding-bottom: 25px; padding-top:3px; background-color:" + COLOR + "'><p style='font-size:25px'>Age</p>"
         // check if text has been changed due to click
         if (prompt != initial){
-              points = points + 1;
-              globalArray[count] = true;
-              count += 1;
-              globalString += "Displaying prompt when input box clicked &#9989;<br>"
+                points = points + 1;
+                ageArray.push(["Displaying prompt when input box clicked", "&#9989"])
         }
         else{
-              errorLog.push("Initial prompt is not displayed when age box clicked (onfocus event)");
-              globalString += "Displaying prompt when input box clicked &#10060;<br>"
+                errorLog.push("Initial prompt is not displayed when age box clicked (onfocus event)");
+                globalString += "Displaying prompt when input box clicked &#10060;<br>"
+                ageArray.push(["Displaying prompt when input box clicked", "&#10060"])
         }
   
         // click birthday box
@@ -237,13 +238,12 @@ async function tester(fp, callback){
         // check if blurring triggers a new message on text box
         if ((reqPrompt != initial) && (reqPrompt != prompt)){
               points = points + 1;
-              globalArray[count] = true;
-              count += 1;
-              globalString += "Displaying a request prompt when user clicks away when input box is empty &#9989;<br>"
+              ageArray.push(["Displaying a request prompt when user clicks away when input box is empty", "&#9989"])
         }
         else{
               errorLog.push("The request prompt when user places cursor outside the date box (onblur event) while its empty is not displayed");
               globalString += "Displaying a request prompt when user clicks away when input box is empty &#10060;<br>"
+              ageArray.push(["Displaying a request prompt when user clicks away when input box is empty", "&#10060"])
         }
   
   
@@ -288,17 +288,17 @@ async function tester(fp, callback){
             
             if (stat){
                   points = points + 1;
-                  globalArray[count] = true;
-                  count += 1;
-                  globalString += "Displaying greeting with correct age when user clicks away when input box is non-empty &#9989;<br>"
+                  ageArray.push(["Displaying greeting with correct age when user clicks away when input box is non-empty", "&#9989"])
             }
             else {
                   errorLog.push("Age is not displayed correctly");
                   globalString += "Displaying greeting with correct age when user clicks away when input box is non-empty &#10060;<br>"
+                  ageArray.push(["Displaying greeting with correct age when user clicks away when input box is non-empty", "&#10060"])
             }
         }
         catch{
             globalString += "Displaying greeting with correct age when user clicks away when input box is non-empty &#10060;<br>"
+            ageArray.push(["Displaying greeting with correct age when user clicks away when input box is non-empty", "&#10060"])
         }
         
         globalString += "</div>"
@@ -354,38 +354,31 @@ async function tester(fp, callback){
         // check if text has the word 'light'/'dark'
         if ((message != initial) && ((message.toLowerCase()).includes(mode))){
               points = points + 1;
-              globalArray[count] = true;
-              count += 1;
-              globalString += "Displaying message when " + mode + " mode selected &#9989;<br>"
+              themeArray.push(["Displaying message when " + mode + " mode selected", "&#9989"])
             
         }
         else{
             errorLog.push("Message indicating that " + mode + " mode was selected is not displayed properly");
             globalString += "Displaying message when " + mode + " mode selected &#10060;<br>"
+            themeArray.push(["Displaying message when " + mode + " mode selected", "&#10060"])
         }
         
         // test display background colour when changing to dark mode
         if (displayColour != initialColour){
               points = points + 1;
-              globalArray[count] = true;
-              count += 1;
-              globalString += "Changing background colour when " + mode + " mode selected &#9989;<br>"
+              themeArray.push(["Changing background colour when " + mode + " mode selected", "&#9989"])
         }
         else{
-            errorLog.push("Background colour doesnt change when " + mode + " mode selected");
-            globalString += "Changing background colour when " + mode + " mode selected &#10060;<br>"
+            themeArray.push(["Changing background colour when " + mode + " mode selected", "&#10060"])
         }
   
         // test display text colour when changing to dark mode
         if (displayTextColour != initialTextColour){
               points = points + 1;
-              globalArray[count] = true;
-              count += 1;
-              globalString += "Changing text colour when " + mode + " mode selected &#9989;<br>"
+              themeArray.push(["Changing text colour when " + mode + " mode selected", "&#9989"])
         }
         else{
-            errorLog.push("Text colour doesnt change when " + mode + " mode selected");
-            globalString += "Changing text colour when " + mode + " mode selected &#10060;<br>"
+            themeArray.push(["Changing text colour when " + mode + " mode selected", "&#10060"])
         }
     }
   
@@ -445,13 +438,15 @@ async function tester(fp, callback){
             errorLog.push("The colour of " + await button.getText() + " button is not changed on mouse hover when the button is on the " + side);
             let key = (await button.getText()).toLowerCase();
             if (key == "html"){
-                htmlBuf += "Button changing colour on mouse hover from the " + side + " side &#10060;<br>"
+                htmlArr.push(["Button changing colour on mouse hover from the " + side + " side", "&#10060"])
             }
             else if (key == "css"){
                 cssBuf += "Button changing colour on mouse hover from the " + side + " side &#10060;<br>"
+                cssArr.push(["Button changing colour on mouse hover from the " + side + " side", "&#10060"])
             }
             else if (key == "javascript"){
                 jsBuf += "Button changing colour on mouse hover from the " + side + " side &#10060;<br>"
+                jsArr.push(["Button changing colour on mouse hover from the " + side + " side", "&#10060"])
             }
         }
     }
@@ -527,26 +522,26 @@ async function tester(fp, callback){
 
             let key = id.toLowerCase()
             if (key == "html"){
-                htmlBuf += "Button moving to right side on click &#10060;<br>"
-                htmlBuf += "Button changing colour on mouse hover from the right side &#10060;<br>"
-                htmlBuf += "Button moving back to left on click &#10060;<br>"
+                htmlArr.push(["Button moving to right side on click", "&#10060"])
+                htmlArr.push(["Button changing colour on mouse hover from the right side", "&#10060"])
+                htmlArr.push(["Button moving back to left on click", "&#10060"])
             }
             else if(key == "css"){
-                cssBuf += "Button moving to right side on click &#10060;<br>"
-                cssBuf += "Button changing colour on mouse hover from the right side &#10060;<br>"
-                cssBuf += "Button moving back to left on click &#10060;<br>"
+                cssArr.push(["Button moving to right side on click", "&#10060"])
+                cssArr.push(["Button changing colour on mouse hover from the right side", "&#10060"])
+                cssArr.push(["Button moving back to left on click", "&#10060"])
             }
             else if (key == "javascript"){
-                jsBuf += "Button moving to right side on click &#10060;<br>"
-                jsBuf += "Button changing colour on mouse hover from the right side &#10060;<br>"
-                jsBuf += "Button moving back to left on click &#10060;<br>"
+                jsArr.push(["Button moving to right side on click", "&#10060"])
+                jsArr.push(["Button changing colour on mouse hover from the right side", "&#10060"])
+                jsArr.push(["Button moving back to left on click", "&#10060"])
             }
         }
 
         if (foundLeft && foundRight){
-            htmlBuf += "Button moving to right side on click &#10060;<br>"
-            cssBuf += "Button moving to right side on click &#10060;<br>"
-            jsBuf += "Button moving to right side on click &#10060;<br>"
+            htmlArr.push(["Button moving to right side on click", "&#10060"])
+            cssArr.push(["Button moving to right side on click", "&#10060"])
+            jsArr.push(["Button moving to right side on click", "&#10060"])
         }
   
         if (foundLeft){
@@ -606,13 +601,13 @@ async function tester(fp, callback){
 
             let key = id.toLowerCase()
             if (key == "html"){
-                htmlBuf += "Button moving to left side on click &#10060;<br>"
+                htmlArr.push(["Button moving to left side on click", "&#10060"])
             }
             else if (key == "css"){
-                cssBuf += "Button moving to left side on click &#10060;<br>"
+                cssArr.push(["Button moving to left side on click", "&#10060"])
             }
             else if (key == "javascript"){
-                jsBuf += "Button moving to left side on click &#10060;<br>"
+                jsArr.push(["Button moving to left side on click", "&#10060"])
             }
 
         }
@@ -699,23 +694,17 @@ async function tester(fp, callback){
         
         if (htmlCorrect){
               points = points + 1;
-              globalArray[count] = true;
-              count += 1;
-              htmlBuf += "Button changing colour on mouse hover &#9989;<br>"
+              htmlArr.push(["Button changing colour on mouse hover", "&#9989"])
         } 
         
         if (cssCorect){
               points = points + 1;
-              globalArray[count] = true;
-              count += 1;
-              cssBuf += "Button changing colour on mouse hover &#9989;<br>"
+              cssArr.push(["Button changing colour on mouse hover", "&#9989"])
         } 
         
         if (jsCorrect){
               points = points + 1;
-              globalArray[count] = true;
-              count += 1;
-              jsBuf += "Button changing colour on mouse hover &#9989;<br>"
+              jsArr.push(["Button changing colour on mouse hover", "&#9989"])
         } 
         
         // testing moving to right from left
@@ -727,25 +716,19 @@ async function tester(fp, callback){
         if (await moveRight("html", numButtons-1, 1, parent)){
               points = points + 1;
               moved = moved + 1;
-              globalArray[count] = true;
-              count += 1;
-              htmlBuf += "Button moving to right side on click &#9989;<br>"
+              htmlArr.push(["Button moving to right side on click", "&#9989"])
         }
     
         if (await moveRight("javascript", numButtons-2, 2, parent)){
               points = points + 1;
               moved = moved + 1;
-              globalArray[count] = true;
-              count += 1;
-              jsBuf += "Button moving to right side on click &#9989;<br>"
+              jsArr.push(["Button moving to right side on click", "&#9989"])
         }
         
         if (await moveRight("css", numButtons-3, 3, parent)){
               points = points + 1;
               moved = moved + 1;
-              globalArray[count] = true;
-              count += 1;
-              cssBuf += "Button moving to right side on click &#9989;<br>"
+              cssArr.push(["Button moving to right side on click", "&#9989"])
         }
         
         let skillsOnRight = await getRightElems();
@@ -754,18 +737,16 @@ async function tester(fp, callback){
         for (let i = 0; i < skillsOnRight.length; i++){
             if (await hover(skillsOnRight[i], right)){
                   points = points + 1;
-                  globalArray[count] = true;
-                  count += 1;
                   let key = (await skillsOnRight[i].getText()).toLowerCase()
 
                   if (key == "html"){
-                    htmlBuf += "Button changing colour on mouse hover from the right side &#9989;<br>"
+                    htmlArr.push(["Button changing colour on mouse hover from the right side", "&#9989"])
                   }
                   else if (key == "css"){
-                    cssBuf += "Button changing colour on mouse hover from the right side &#9989;<br>"
+                    cssArr.push(["Button changing colour on mouse hover from the right side", "&#9989"])
                   }
                   else if (key == "javascript"){
-                    jsBuf += "Button changing colour on mouse hover from the right side &#9989;<br>"
+                    jsArr.push(["Button changing colour on mouse hover from the right side", "&#9989"])
                   }
                 //   globalString += (await skillsOnRight[i].getText()).toUpperCase() + " button changing colour on mouse hover from the right side &#9989;<br>"
             }
@@ -779,29 +760,18 @@ async function tester(fp, callback){
             let buttonName = (await skillsOnRight[i].getText()).toLowerCase();
             if (await moveLeft(skillsOnRight[i], buttonName, ((i + 1)), (numButtons - (i + 1)), parent)){
                     points = points + 1;
-                    globalArray[count] = true;
-                    count += 1;
                     if (buttonName == "html"){
-                        htmlBuf += "Button moving back to left on click &#9989;<br>"
+                        htmlArr.push(["Button moving back to left on click", "&#9989"])
                       }
                       else if (buttonName == "css"){
-                        cssBuf += "Button moving back to left on click &#9989;<br>"
+                        cssArr.push(["Button moving back to left on click", "&#9989"])
                       }
                       else if (buttonName == "javascript"){
-                        jsBuf += "Button moving back to left on click &#9989;<br>"
+                        jsArr.push(["Button moving back to left on click", "&#9989"])
                       }
                 //   globalString += buttonName.toUpperCase() + " button moving back to left on click &#9989;<br>"
             }
         }
-
-        globalString += htmlBuf
-        globalString += "<br>"
-        globalString += cssBuf
-        globalString += "<br>"
-        globalString += jsBuf
-        globalString += "<br>"
-
-        globalString += "<p style='font-size:20px'>Additional Points:</p>"
 
         // testing button ordering when moving
 
@@ -830,29 +800,28 @@ async function tester(fp, callback){
 
             if (test1L && test2L && test3L){
                 points = points + 1;
-                globalArray[count] = true;
-                count += 1;
-                globalString += "Ordering of buttons is the same order in which buttons clicked when moving to right &#9989;<br>"
+                skillsArray.push(["Ordering of buttons is the same order in which buttons clicked when moving to right", "&#9989"])
             }
             else{
                 globalString += "Ordering of buttons is the same order in which buttons clicked when moving to right &#10060;<br>"
+                skillsArray.push(["Ordering of buttons is the same order in which buttons clicked when moving to right", "&#10060"])
             }
 
 
             if (test1R && test2R && test3R){
                 points = points + 1;
-                globalArray[count] = true;
-                count += 1;
-                globalString += "Ordering of buttons is the same order in which buttons clicked when moving back to left &#9989;<br>"
+                skillsArray.push(["Ordering of buttons is the same order in which buttons clicked when moving back to left", "&#9989"])
+
             }
             else{
-                globalString += "Ordering of buttons is the same order in which buttons clicked when moving back to left &#10060;<br>"
+                skillsArray.push(["Ordering of buttons is the same order in which buttons clicked when moving back to left", "&#10060"])
             }
 
             }
         catch{
-            globalString += "Ordering of buttons is the same order in which buttons clicked when moving to right &#10060;<br>"
-            globalString += "Ordering of buttons is the same order in which buttons clicked when moving to right &#10060;<br>"
+            skillsArray.push(["Ordering of buttons is the same order in which buttons clicked when moving to right", "&#10060"])
+            skillsArray.push(["Ordering of buttons is the same order in which buttons clicked when moving back to left", "&#10060"])
+
         }
         
 
@@ -905,19 +874,271 @@ async function tester(fp, callback){
         }
         
     }
+
+
+    async function renderHTML(){
+        globalString = `<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8"/>
+            <title>DIEM Javascript Challenge Results Template</title>
+            <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+          </head>
+          <body style="background-color: #2f6fa3;">
+            <div id="container">
+                <div id="title" style="color: #d0dfe8; font-size: 3em; margin-bottom: 1em; text-align: center;">
+                    <u><strong>PERFORMANCE REVIEW OF YOUR CODE</strong></u>
+                </div>
+                <div id="table" style="background-color:white; width: 75%; margin: auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="font-size: 1.35em;"></th>
+                                <th scope="col" style="font-size: 1.35em;"></th>
+                                <th scope="col" style="font-size: 1.35em;">Tested Property</th>
+                                <th scope="col" style="font-size: 1.35em;">Status</th>
+                              </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row" style="font-size: 1.25em;">Name</th>
+                                <th scope="row"></th>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th scope="row" style="font-size: 1.25em;"></th>
+                                <th scope="row"></th>
+                                <td>${nameArray[0][0]}</td>
+                                <td>${nameArray[0][1]}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${nameArray[1][0]}</td>
+                                <td>${nameArray[1][1]}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${nameArray[2][0]}</td>
+                                <td>${nameArray[2][1]}</td>
+                            </tr>
+
+
+
+                            <tr class="table-active">
+                                <th scope="row" style="font-size: 1.25em;">Age</th>
+                                <th scope="row"></th>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row" style="font-size: 1.25em;"></th>
+                                <th scope="row"></th>
+                                <td>${ageArray[0][0]}</td>
+                                <td>${ageArray[0][1]}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${ageArray[1][0]}</td>
+                                <td>${ageArray[1][1]}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${ageArray[2][0]}</td>
+                                <td>${ageArray[2][1]}</td>
+                            </tr>
+
+
+                            <tr>
+                                <th scope="row" style="font-size: 1.25em;">Theme</th>
+                                <th scope="row"></th>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th scope="row" style="font-size: 1.25em;"></th>
+                                <th scope="row">Dark Mode</th>
+                                <td>${themeArray[0][0]}</td>
+                                <td>${themeArray[0][1]}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${themeArray[1][0]}</td>
+                                <td>${themeArray[1][1]}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${themeArray[2][0]}</td>
+                                <td>${themeArray[2][1]}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td style = 'color:white'>&nbsp;</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th scope="row" style="font-size: 1.25em;"></th>
+                                <th scope="row">Light Mode</th>
+                                <td>${themeArray[3][0]}</td>
+                                <td>${themeArray[3][1]}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${themeArray[4][0]}</td>
+                                <td>${themeArray[4][1]}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${themeArray[5][0]}</td>
+                                <td>${themeArray[5][1]}</td>
+                            </tr>
+
+                            
+                            <tr class="table-active">
+                                <th scope="row" style="font-size: 1.25em;">Skills</th>
+                                <th scope="row"></th>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <tr class="table-active">
+                                <th scope="row" style="font-size: 1.25em;"></th>
+                                <th scope="row">HTML</th>
+                                <td>${htmlArr[0][0]}</td>
+                                <td>${htmlArr[0][1]}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${htmlArr[1][0]}</td>
+                                <td>${htmlArr[1][1]}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${htmlArr[2][0]}</td>
+                                <td>${htmlArr[2][1]}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${htmlArr[3][0]}</td>
+                                <td>${htmlArr[3][1]}</td>
+                            </tr>
+
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td style = 'color:white'>&nbsp;</td>
+                                <td></td>
+                            </tr>
+
+                            <tr class="table-active">
+                                <th scope="row" style="font-size: 1.25em;"></th>
+                                <th scope="row">CSS</th>
+                                <td>${cssArr[0][0]}</td>
+                                <td>${cssArr[0][1]}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${cssArr[1][0]}</td>
+                                <td>${cssArr[1][1]}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${cssArr[2][0]}</td>
+                                <td>${cssArr[2][1]}</td>
+                            </tr>
+
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${cssArr[3][0]}</td>
+                                <td>${cssArr[3][1]}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td style = 'color:white'>&nbsp;</td>
+                                <td></td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row" style="font-size: 1.25em;"></th>
+                                <th scope="row">JavaScript</th>
+                                <td>${jsArr[0][0]}</td>
+                                <td>${jsArr[0][1]}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${jsArr[1][0]}</td>
+                                <td>${jsArr[1][1]}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${jsArr[2][0]}</td>
+                                <td>${jsArr[2][1]}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${jsArr[3][0]}</td>
+                                <td>${jsArr[3][1]}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td style = 'color:white'>&nbsp;</td>
+                                <td></td>
+                            </tr>
+                            <tr class="table-active">
+                                <th scope="row" style="font-size: 1.25em;"></th>
+                                <th scope="row">Additional Points</th>
+                                <td>${skillsArray[0][0]}</td>
+                                <td>${skillsArray[0][1]}</td>
+                            </tr>
+                            
+                            <tr class="table-active">
+                                <th scope="row"></th>
+                                <th scope="row"></th>
+                                <td>${skillsArray[1][0]}</td>
+                                <td>${skillsArray[1][1]}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div><br><br>  
+                <div id="totalScore">
+                    <div id="subtitle" style="color: #d0dfe8; font-size: 1.5em; margin-bottom: 1em; text-align: center;">
+                        <strong>Final Results</strong>
+                    </div>
+                    <div class="card text-dark bg-light mb-3" style="width: 50%; margin: auto;">
+                        <div class="card-header">Code Status</div>
+                        <div class="card-body">
+                          <h5 class="card-title">Performance Score</h5>
+                          <p class="card-text">Congratulations! You have a total score of ${points}/${MAX_POINTS} based on the test results above.</p>
+                        </div>
+                      </div>
+                </div>
+            </div>
+          </body>
+        </html>
+        `
+    }
   
-  
-    /**
-        * This is the main function that invokes the validation function and the testing functions
-    */
-    // try{
-    //     await initializeDriver()
-    // }
-    // catch{
-    //     driver.quit()
-    //     globalString = "File path error"
-    //     callback()
-    // }
 
     let pathErr = false
     let first = fp.split(':')[0]
@@ -940,23 +1161,10 @@ async function tester(fp, callback){
             await testBirthday();
             await testTheme();
             await testSkills();
-            
-            globalString += "<p style='font-size:35px; color:white'> <br><br>Final Points: " + points.toString() + "/26 </p>";
-            globalString += "</div></body>"
+
+            await renderHTML()
 
             console.log("Final Score: " + points + "/26 (Full Points)");
-
-            // if (errorLog.length == 0){
-                
-            // }
-            // else{
-            //     console.log("\nFinal Score: " + points + "/26");
-            //     // console.log("\nError Log: ");
-            //     // for (let i = 0; i < errorLog.length; i++){
-            //     //     console.log(errorLog[i]);
-            //     // }
-            //     console.log("\n");
-            // }
             
         }
         else{
