@@ -22,20 +22,13 @@ app.post("/", (req, res) => {
     cssArr= []
     jsArr = []
 
-    var isValid = true
-    if (isValid) {
-        try{
-            tester(req.body.filePath, function() {
-                res.send(globalString)
-            })
-        }
-        catch{
-            res.send("There was a problem with the selected file. Please try again.")
-        }
+    try{
+        tester(req.body.filePath, function() {
+            res.send(globalString)
+        })
     }
-    else{
-        console.log("Error")
-        res.redirect('/')
+    catch{
+        res.send("There was a problem with the selected file. Please try again.")
     }
     
 })
@@ -484,6 +477,8 @@ async function tester(fp, callback){
     */
     async function moveRight(id, leftCount, rightCount, handle){
         let button = await driver.findElement(By.id(id));
+
+        let name = await button.getText()
   
         // click button
         await button.click();
@@ -494,6 +489,8 @@ async function tester(fp, callback){
 
         let leftBtns = (await getButtons(left)).length
         let rightBtns = (await getButtons(right)).length
+
+       
   
         // checking if button moved to right side
         let foundRight = false;
@@ -512,6 +509,8 @@ async function tester(fp, callback){
                 foundLeft = true;
             }
         }
+
+        
   
         // if button not moved to right side, consequently points will be reduced for hovering on right side and moving back to left
         if (foundRight == false){
@@ -520,7 +519,7 @@ async function tester(fp, callback){
             errorLog.push(id + " button not moved to left side");
             
 
-            let key = id.toLowerCase()
+            let key = name.toLowerCase()
             if (key == "html"){
                 htmlArr.push(["Button moving to right side on click", "&#10060"])
                 htmlArr.push(["Button changing colour on mouse hover from the right side", "&#10060"])
@@ -537,19 +536,14 @@ async function tester(fp, callback){
                 jsArr.push(["Button moving back to left on click", "&#10060"])
             }
         }
-
-        if (foundLeft && foundRight){
-            htmlArr.push(["Button moving to right side on click", "&#10060"])
-            cssArr.push(["Button moving to right side on click", "&#10060"])
-            jsArr.push(["Button moving to right side on click", "&#10060"])
+        else {
+            if (foundLeft || leftBtns != leftCount || rightBtns != rightCount){
+                htmlArr.push(["Button moving to right side on click", "&#10060"])
+                cssArr.push(["Button moving to right side on click", "&#10060"])
+                jsArr.push(["Button moving to right side on click", "&#10060"])
+            }
         }
-  
-        if (foundLeft){
-            errorLog.push(id + " button not removed from left side");
-        }
-
-  
-        return (leftBtns == leftCount && rightBtns == rightCount && foundRight && foundLeft == false);
+        return (leftBtns == leftCount && rightBtns == rightCount && foundRight && foundLeft == false)
     }
   
   
@@ -564,6 +558,8 @@ async function tester(fp, callback){
         * @returns A boolean value indicating if the provided button was successfully moved
     */
     async function moveLeft(button, id, leftCount, rightCount, handle){
+
+        let name = await button.getText()
   
         // click button
         await button.click();
@@ -596,9 +592,10 @@ async function tester(fp, callback){
         }
 
 
-        if (foundLeft == false || foundRight){
-            errorLog.push(id + " button not moved to left side");
-
+        if (leftBtns == leftCount && rightBtns == rightCount && foundLeft && foundRight == false){
+            return true
+        }
+        else{
             let key = id.toLowerCase()
             if (key == "html"){
                 htmlArr.push(["Button moving to left side on click", "&#10060"])
@@ -609,14 +606,8 @@ async function tester(fp, callback){
             else if (key == "javascript"){
                 jsArr.push(["Button moving to left side on click", "&#10060"])
             }
-
+            return false
         }
-  
-        if (foundRight){
-            errorLog.push(id + " button not removed from right side");
-        }
-  
-        return (leftBtns == leftCount && rightBtns == rightCount && foundLeft && foundRight == false);
     }
 
 
@@ -678,8 +669,6 @@ async function tester(fp, callback){
   
         let left = "left";
         let right = "right;"
-
-        globalString += "<div style='padding-left: 25px; padding-bottom: 25px; padding-top:3px; background-color:" + COLOR + "'><p style='font-size:25px'>Skills</p>"
   
         // testing hover
         let htmlButton = await driver.findElement(By.id("html"));
@@ -711,33 +700,39 @@ async function tester(fp, callback){
         // obtain left side buttons handle using html button and use this handle for tracking all three buttons on the left
         let element = await driver.findElement(By.id("html"));
         let parent = await element.findElement(By.xpath("./.."));
-        let numButtons = 3;
+        let leftHtmlElems = await getLeftElems(parent);
+        let rightHtmlElems = await getRightElems();
+        let leftButtons = (await getButtons(leftHtmlElems)).length;
+        let rightButtons = (await getButtons(rightHtmlElems)).length;
         let moved = 1;
-        if (await moveRight("html", numButtons-1, 1, parent)){
+        if (await moveRight("html", leftButtons - moved, rightButtons + moved, parent)){
               points = points + 1;
               moved = moved + 1;
               htmlArr.push(["Button moving to right side on click", "&#9989"])
         }
     
-        if (await moveRight("javascript", numButtons-2, 2, parent)){
+        if (await moveRight("javascript", leftButtons - moved, rightButtons + moved, parent)){
               points = points + 1;
               moved = moved + 1;
               jsArr.push(["Button moving to right side on click", "&#9989"])
         }
         
-        if (await moveRight("css", numButtons-3, 3, parent)){
+        if (await moveRight("css", leftButtons - moved, rightButtons + moved, parent)){
               points = points + 1;
               moved = moved + 1;
               cssArr.push(["Button moving to right side on click", "&#9989"])
         }
         
-        let skillsOnRight = await getRightElems();
+        let elemsOnRight = await getRightElems();
+        let buttonsOnRight = await getButtons(elemsOnRight);
+        
         
         // testing hover on right side
-        for (let i = 0; i < skillsOnRight.length; i++){
-            if (await hover(skillsOnRight[i], right)){
+        for (let i = 0; i < buttonsOnRight.length; i++){
+            if (await hover(buttonsOnRight[i], right)){
                   points = points + 1;
-                  let key = (await skillsOnRight[i].getText()).toLowerCase()
+                  let key = (await buttonsOnRight[i].getText()).toLowerCase()
+                  
 
                   if (key == "html"){
                     htmlArr.push(["Button changing colour on mouse hover from the right side", "&#9989"])
@@ -748,32 +743,32 @@ async function tester(fp, callback){
                   else if (key == "javascript"){
                     jsArr.push(["Button changing colour on mouse hover from the right side", "&#9989"])
                   }
-                //   globalString += (await skillsOnRight[i].getText()).toUpperCase() + " button changing colour on mouse hover from the right side &#9989;<br>"
             }
         }
 
-        // console.log(cssBuf)
   
-        // testing moving to left from right
-        numButtons = 3;
-        for (let i = 0; i < skillsOnRight.length; i++){
-            let buttonName = (await skillsOnRight[i].getText()).toLowerCase();
-            if (await moveLeft(skillsOnRight[i], buttonName, ((i + 1)), (numButtons - (i + 1)), parent)){
-                    points = points + 1;
-                    if (buttonName == "html"){
-                        htmlArr.push(["Button moving back to left on click", "&#9989"])
-                      }
-                      else if (buttonName == "css"){
-                        cssArr.push(["Button moving back to left on click", "&#9989"])
-                      }
-                      else if (buttonName == "javascript"){
-                        jsArr.push(["Button moving back to left on click", "&#9989"])
-                      }
-                //   globalString += buttonName.toUpperCase() + " button moving back to left on click &#9989;<br>"
+        // // testing moving to left from right
+        leftHtmlElems = await getLeftElems(parent);
+        rightHtmlElems = await getRightElems();
+        leftButtons = (await getButtons(leftHtmlElems)).length;
+        rightButtons = (await getButtons(rightHtmlElems)).length;
+        for (let i = 0; i < buttonsOnRight.length; i++){
+            let buttonName = (await buttonsOnRight[i].getText()).toLowerCase();
+            if (await moveLeft(buttonsOnRight[i], buttonName, (leftButtons + (i + 1)), (rightButtons - (i + 1)), parent)){
+                points = points + 1;
+                if (buttonName == "html"){
+                    htmlArr.push(["Button moving back to left on click", "&#9989"])
+                }
+                else if (buttonName == "css"){
+                    cssArr.push(["Button moving back to left on click", "&#9989"])
+                }
+                else if (buttonName == "javascript"){
+                    jsArr.push(["Button moving back to left on click", "&#9989"])
+                }
             }
         }
 
-        // testing button ordering when moving
+        // // testing button ordering when moving
 
         try{
             let leftElems = await getLeftElems(parent)
@@ -825,7 +820,7 @@ async function tester(fp, callback){
         }
         
 
-        globalString += "</div>"
+        // globalString += "</div>"
 
     }
 
@@ -877,6 +872,118 @@ async function tester(fp, callback){
 
 
     async function renderHTML(){
+        // this section was added to catch any problems with the skills section,
+        // since that is the only section where a crash could occur
+
+        // let htmlHover;
+
+        try{
+             htmlHover = htmlArr[0][0]
+             htmlHoverRes = htmlArr[0][1]
+        }
+        catch{
+             htmlHover = "Button changing colour on mouse hover"
+             htmlHoverRes = "&#10060"
+        }
+
+        try{
+             htmlMoveRight= htmlArr[1][0]
+             htmlMoveRightRes = htmlArr[1][1]
+        }
+        catch{
+             htmlMoveRight = "Button moving to right side on click"
+             htmlMoveRightRes = "&#10060"
+        }
+
+        try{
+             htmlHoverRight= htmlArr[2][0]
+             htmlHoverRightRes = htmlArr[2][1]
+        }
+        catch{
+             htmlHoverRight= "Button changing colour on mouse hover from the right side"
+             htmlHoverRightRes = "&#10060"
+        }
+
+        try{
+             htmlMoveLeft= htmlArr[3][0]
+             htmlMoveLeftRes = htmlArr[3][1]
+        }
+        catch{
+             htmlMoveLeft= "Button moving back to left on click"
+             htmlMoveLeftRes = "&#10060"
+        }
+
+        try{
+             jsHover = jsArr[0][0]
+             jsHoverRes = jsArr[0][1]
+        }
+        catch{
+             jsHover = "Button changing colour on mouse hover"
+             jsHoverRes = "&#10060"
+        }
+
+        try{
+             jsMoveRight= jsArr[1][0]
+             jsMoveRightRes = jsArr[1][1]
+        }
+        catch{
+             jsMoveRight = "Button moving to right side on click"
+             jsMoveRightRes = "&#10060"
+        }
+
+        try{
+             jsHoverRight= jsArr[2][0]
+             jsHoverRightRes = jsArr[2][1]
+        }
+        catch{
+             jsHoverRight= "Button changing colour on mouse hover from the right side"
+             jsHoverRightRes = "&#10060"
+        }
+
+        try{
+             jsMoveLeft= jsArr[3][0]
+             jsMoveLeftRes = jsArr[3][1]
+        }
+        catch{
+             jsMoveLeft= "Button moving back to left on click"
+             jsMoveLeftRes = "&#10060"
+        }
+
+        try{
+             cssHover = cssArr[0][0]
+             cssHoverRes = cssArr[0][1]
+        }
+        catch{
+             cssHover = "Button changing colour on mouse hover"
+             cssHoverRes = "&#10060"
+        }
+
+        try{
+             cssMoveRight= cssArr[1][0]
+             cssMoveRightRes = cssArr[1][1]
+        }
+        catch{
+             cssMoveRight = "Button moving to right side on click"
+             cssMoveRightRes = "&#10060"
+        }
+
+        try{
+             cssHoverRight= cssArr[2][0]
+             cssHoverRightRes = cssArr[2][1]
+        }
+        catch{
+             cssHoverRight= "Button changing colour on mouse hover from the right side"
+             cssHoverRightRes = "&#10060"
+        }
+
+        try{
+             cssMoveLeft= cssArr[3][0]
+             cssMoveLeftRes = cssArr[3][1]
+        }
+        catch{
+             cssMoveLeft= "Button moving back to left on click"
+             cssMoveLeftRes = "&#10060"
+        }
         globalString = `<!DOCTYPE html>
         <html>
         <head>
@@ -1015,26 +1122,26 @@ async function tester(fp, callback){
                             <tr class="table-active">
                                 <th scope="row" style="font-size: 1.25em;"></th>
                                 <th scope="row">HTML</th>
-                                <td>${htmlArr[0][0]}</td>
-                                <td>${htmlArr[0][1]}</td>
+                                <td>${htmlHover}</td>
+                                <td>${htmlHoverRes}</td>
                             </tr>
                             <tr class="table-active">
                                 <th scope="row"></th>
                                 <th scope="row"></th>
-                                <td>${htmlArr[1][0]}</td>
-                                <td>${htmlArr[1][1]}</td>
+                                <td>${htmlMoveRight}</td>
+                                <td>${htmlMoveRightRes}</td>
                             </tr>
                             <tr class="table-active">
                                 <th scope="row"></th>
                                 <th scope="row"></th>
-                                <td>${htmlArr[2][0]}</td>
-                                <td>${htmlArr[2][1]}</td>
+                                <td>${htmlHoverRight}</td>
+                                <td>${htmlHoverRightRes}</td>
                             </tr>
                             <tr class="table-active">
                                 <th scope="row"></th>
                                 <th scope="row"></th>
-                                <td>${htmlArr[3][0]}</td>
-                                <td>${htmlArr[3][1]}</td>
+                                <td>${htmlMoveLeft}</td>
+                                <td>${htmlMoveLeftRes}</td>
                             </tr>
 
                             <tr class="table-active">
@@ -1047,27 +1154,27 @@ async function tester(fp, callback){
                             <tr class="table-active">
                                 <th scope="row" style="font-size: 1.25em;"></th>
                                 <th scope="row">CSS</th>
-                                <td>${cssArr[0][0]}</td>
-                                <td>${cssArr[0][1]}</td>
+                                <td>${cssHover}</td>
+                                <td>${cssHoverRes}</td>
                             </tr>
                             <tr class="table-active">
                                 <th scope="row"></th>
                                 <th scope="row"></th>
-                                <td>${cssArr[1][0]}</td>
-                                <td>${cssArr[1][1]}</td>
+                                <td>${cssMoveRight}</td>
+                                <td>${cssMoveRightRes}</td>
                             </tr>
                             <tr class="table-active">
                                 <th scope="row"></th>
                                 <th scope="row"></th>
-                                <td>${cssArr[2][0]}</td>
-                                <td>${cssArr[2][1]}</td>
+                                <td>${cssHoverRight}</td>
+                                <td>${cssHoverRightRes}</td>
                             </tr>
 
                             <tr class="table-active">
                                 <th scope="row"></th>
                                 <th scope="row"></th>
-                                <td>${cssArr[3][0]}</td>
-                                <td>${cssArr[3][1]}</td>
+                                <td>${cssMoveLeft}</td>
+                                <td>${cssMoveLeftRes}</td>
                             </tr>
                             <tr class="table-active">
                                 <th scope="row"></th>
@@ -1078,26 +1185,26 @@ async function tester(fp, callback){
                             <tr class="table-active">
                                 <th scope="row" style="font-size: 1.25em;"></th>
                                 <th scope="row">JavaScript</th>
-                                <td>${jsArr[0][0]}</td>
-                                <td>${jsArr[0][1]}</td>
+                                <td>${jsHover}</td>
+                                <td>${jsHoverRes}</td>
                             </tr>
                             <tr class="table-active">
                                 <th scope="row"></th>
                                 <th scope="row"></th>
-                                <td>${jsArr[1][0]}</td>
-                                <td>${jsArr[1][1]}</td>
+                                <td>${jsMoveRight}</td>
+                                <td>${jsMoveRightRes}</td>
                             </tr>
                             <tr class="table-active">
                                 <th scope="row"></th>
                                 <th scope="row"></th>
-                                <td>${jsArr[2][0]}</td>
-                                <td>${jsArr[2][1]}</td>
+                                <td>${jsHoverRight}</td>
+                                <td>${jsHoverRightRes}</td>
                             </tr>
                             <tr class="table-active">
                                 <th scope="row"></th>
                                 <th scope="row"></th>
-                                <td>${jsArr[3][0]}</td>
-                                <td>${jsArr[3][1]}</td>
+                                <td>${jsMoveLeft}</td>
+                                <td>${jsMoveLeftRes}</td>
                             </tr>
                             <tr class="table-active">
                                 <th scope="row"></th>
