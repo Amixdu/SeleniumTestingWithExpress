@@ -1129,7 +1129,7 @@ async function tester(fp, callback){
                         <div class="card-header">Code Status</div>
                         <div class="card-body">
                           <h5 class="card-title">Performance Score</h5>
-                          <p class="card-text">Congratulations! You have a total score of ${points}/${MAX_POINTS} based on the test results above.</p>
+                          <p class="card-text">Congratulations! You have a final score of <strong>${points}/${MAX_POINTS}</strong> based on the test results shown above.</p>
                         </div>
                       </div>
                 </div>
