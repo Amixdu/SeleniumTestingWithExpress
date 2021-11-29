@@ -269,7 +269,6 @@ async function tester(fp, callback){
         var ageGotten = ageOutput.match(/(\d+)/);
   
         // compare correct age with displayed age
-  
         var stat = false;
   
         try{
@@ -617,7 +616,7 @@ async function tester(fp, callback){
         * @param {The first button element to be clicked} button1 
         * @param {The second button element to be clicked} button2 
         * @param {The third button element to be clicked} button3 
-        * @param {Html element that is used to obtain the element count} handle 
+        * @param {Html element that is used to obtain the element count on the left side} handle 
         * @param {Indicates clicking from left or right} side
         * @returns A boolean value indicating if the provided button was successfully moved
     */
@@ -650,7 +649,7 @@ async function tester(fp, callback){
             }
         }
 
-        return correctOrder
+        return (correctOrder && (btnList.length == 3))
 
     }
   
@@ -768,29 +767,29 @@ async function tester(fp, callback){
             }
         }
 
-        // // testing button ordering when moving
+        // testing button ordering when moving
 
         try{
-            let leftElems = await getLeftElems(parent)
-            let leftBtns = await getButtons(leftElems)
-            let test1L = await testOrder(leftBtns[0], leftBtns[1], leftBtns[2], parent, LEFT)
+            let leftElems = await (getLeftElems(parent))
+            let leftBtns = await (getButtons(leftElems))
+            let test1L = await testOrder(leftBtns[0], leftBtns[1], leftBtns[2], parent, RIGHT)
             let rightElems = await getRightElems();
-            let rightBtns = await getButtons(rightElems)
-            let test1R = await testOrder(rightBtns[0], rightBtns[1], rightBtns[2], parent, RIGHT)
+            let rightBtns = await (getButtons(rightElems))
+            let test1R = await testOrder(rightBtns[0], rightBtns[1], rightBtns[2], parent, LEFT)
 
             leftElems = await getLeftElems(parent)
             leftBtns = await getButtons(leftElems)
-            let test2L = await testOrder(leftBtns[1], leftBtns[2], leftBtns[0], parent, LEFT)
+            let test2L = await testOrder(leftBtns[1], leftBtns[2], leftBtns[0], parent, RIGHT)
             rightElems = await getRightElems();
             rightBtns = await getButtons(rightElems)
-            let test2R = await testOrder(rightBtns[1], rightBtns[2], rightBtns[0], parent, RIGHT)
+            let test2R = await testOrder(rightBtns[1], rightBtns[2], rightBtns[0], parent, LEFT)
 
             leftElems = await getLeftElems(parent)
             leftBtns = await getButtons(leftElems)
-            let test3L = await testOrder(leftBtns[2], leftBtns[1], leftBtns[0], parent, LEFT)
+            let test3L = await testOrder(leftBtns[2], leftBtns[1], leftBtns[0], parent, RIGHT)
             rightElems = await getRightElems();
             rightBtns = await getButtons(rightElems)
-            let test3R = await testOrder(rightBtns[2], rightBtns[1], rightBtns[0], parent, RIGHT)
+            let test3R = await testOrder(rightBtns[2], rightBtns[1], rightBtns[0], parent, LEFT)
 
 
             if (test1L && test2L && test3L){
@@ -798,7 +797,6 @@ async function tester(fp, callback){
                 skillsArray.push(["Ordering of buttons is the same order in which buttons clicked when moving to right", "&#9989"])
             }
             else{
-                globalString += "Ordering of buttons is the same order in which buttons clicked when moving to right &#10060;<br>"
                 skillsArray.push(["Ordering of buttons is the same order in which buttons clicked when moving to right", "&#10060"])
             }
 
@@ -812,15 +810,14 @@ async function tester(fp, callback){
                 skillsArray.push(["Ordering of buttons is the same order in which buttons clicked when moving back to left", "&#10060"])
             }
 
+            
             }
-        catch{
+        catch(e){
+            console.log("ERROR: " + e)
             skillsArray.push(["Ordering of buttons is the same order in which buttons clicked when moving to right", "&#10060"])
             skillsArray.push(["Ordering of buttons is the same order in which buttons clicked when moving back to left", "&#10060"])
 
         }
-        
-
-        // globalString += "</div>"
 
     }
 
@@ -864,19 +861,19 @@ async function tester(fp, callback){
         }
         
         catch (e){
-            globalString = "There is a problem in the provided file. Please ensure that the entered file path is correct and the original element IDs of the starter HTML code is not modified"
             return false;
         }
         
     }
 
 
+    /**
+        * function to create the html page from the results to be shown to user
+    */
     async function renderHTML(){
+
         // this section was added to catch any problems with the skills section,
-        // since that is the only section where a crash could occur
-
-        // let htmlHover;
-
+        // since that is the only section where a crash could possibly occur
         try{
              htmlHover = htmlArr[0][0]
              htmlHoverRes = htmlArr[0][1]
@@ -984,6 +981,7 @@ async function tester(fp, callback){
              cssMoveLeft= "Button moving back to left on click"
              cssMoveLeftRes = "&#10060"
         }
+
         globalString = `<!DOCTYPE html>
         <html>
         <head>
@@ -1212,19 +1210,21 @@ async function tester(fp, callback){
                                 <td style = 'color:white'>&nbsp;</td>
                                 <td></td>
                             </tr>
+
                             <tr class="table-active">
                                 <th scope="row" style="font-size: 1.25em;"></th>
                                 <th scope="row">Additional Points</th>
                                 <td>${skillsArray[0][0]}</td>
                                 <td>${skillsArray[0][1]}</td>
                             </tr>
-                            
+                        
                             <tr class="table-active">
                                 <th scope="row"></th>
                                 <th scope="row"></th>
                                 <td>${skillsArray[1][0]}</td>
                                 <td>${skillsArray[1][1]}</td>
                             </tr>
+                            
                         </tbody>
                     </table>
                 </div><br><br>  
@@ -1245,6 +1245,9 @@ async function tester(fp, callback){
         </html>
         `
     }
+
+
+   
   
 
     let pathErr = false
@@ -1270,12 +1273,10 @@ async function tester(fp, callback){
             await testSkills();
 
             await renderHTML()
-
-            console.log("Final Score: " + points + "/26 (Full Points)");
             
         }
         else{
-            console.log("\nAn Id of an element in the original starter HTML code file has been removed or changed\n");
+            globalString = "There is a problem in the provided file. Please ensure that the entered file path is correct and the original element IDs of the starter HTML code is not modified"
         }
     }
     else{
