@@ -990,6 +990,11 @@ async function tester(fp, callback){
             <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+            <script>
+                function goBack(){
+                    location.href = "index.html";
+                }
+            </script>
           </head>
           <body style="background-color: #2f6fa3;">
             <div id="container">
@@ -1239,6 +1244,9 @@ async function tester(fp, callback){
                           <p class="card-text">Congratulations! You have a final score of <strong>${points}/${MAX_POINTS}</strong> based on the test results shown above.</p>
                         </div>
                       </div>
+                      <div class="col text-center">
+                        <button type="button" class="btn btn-light" onClick="goBack()" style="margin-top: 1.5rem; margin-bottom: 0.5em;"><i class="bi bi-arrow-left"></i> Go Back</button>
+                    </div>
                 </div>
             </div>
           </body>
